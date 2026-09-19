@@ -1,0 +1,22 @@
+# LocalStack for Task B5 — LocalStack Validation.
+# Start:  docker compose up -d
+# Check:  docker compose ps        (STATUS should read "healthy")
+# Stop:   docker compose down
+#
+# Only the services Lab 1 uses are enabled. SageMaker is not in LocalStack
+# Community, which is why environments/local omits the sagemaker module.
+services:
+  localstack:
+    image: localstack/localstack:4
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3,iam,ec2,sts
+      - DEBUG=0
+    volumes:
+      - "./.localstack:/var/lib/localstack"
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:4566/_localstack/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 20

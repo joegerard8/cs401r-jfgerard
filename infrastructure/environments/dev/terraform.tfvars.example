@@ -1,0 +1,12 @@
+# Task B4. Copy to terraform.tfvars and adjust if needed. terraform.tfvars is
+# gitignored and must never be committed; this .example file is committed.
+# Every value below is also the variable's default, so an empty
+# terraform.tfvars is a valid one.
+
+project                 = "northstar"
+environment             = "dev"
+aws_region              = "us-east-1"
+vpc_cidr                = "10.0.0.0/16"
+public_subnet_cidr      = "10.0.100.0/24"
+availability_zone       = "us-east-1a"
+sagemaker_instance_type = "ml.t3.medium"
