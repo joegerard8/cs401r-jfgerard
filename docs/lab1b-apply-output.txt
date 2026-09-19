@@ -1,0 +1,130 @@
+
+Warning: Deprecated Parameter
+
+The parameter "dynamodb_table" is deprecated. Use parameter "use_lockfile"
+instead.
+module.iam.data.aws_caller_identity.current: Reading...
+module.storage.data.aws_caller_identity.current: Reading...
+module.iam.aws_iam_role.ml_engineer: Refreshing state... [id=northstar-dev-MLEngineer]
+module.vpc.aws_vpc.this: Refreshing state... [id=vpc-0ecb320c0d3ac1bda]
+module.iam.data.aws_caller_identity.current: Read complete after 0s [id=060245184393]
+module.iam.aws_iam_policy.ml_engineer: Refreshing state... [id=arn:aws:iam::060245184393:policy/northstar-dev-MLEngineerPolicy]
+module.storage.data.aws_caller_identity.current: Read complete after 0s [id=060245184393]
+module.storage.aws_s3_bucket.data: Refreshing state... [id=northstar-dev-data-060245184393]
+module.iam.aws_iam_role_policy_attachment.ml_engineer: Refreshing state... [id=northstar-dev-MLEngineer-20260919215252689700000001]
+module.vpc.aws_internet_gateway.this: Refreshing state... [id=igw-0c6ffe8ac3e09bbb6]
+module.vpc.aws_security_group.this: Refreshing state... [id=sg-025c5fbfd0cca64e1]
+module.vpc.aws_subnet.public: Refreshing state... [id=subnet-013dffbc5997fa128]
+module.vpc.aws_route_table.public: Refreshing state... [id=rtb-06f5497d6ac873a1e]
+module.storage.aws_s3_bucket_versioning.data: Refreshing state... [id=northstar-dev-data-060245184393]
+module.storage.aws_s3_bucket_server_side_encryption_configuration.data: Refreshing state... [id=northstar-dev-data-060245184393]
+module.storage.aws_s3_bucket_public_access_block.data: Refreshing state... [id=northstar-dev-data-060245184393]
+module.storage.aws_s3_object.prefix["processed/"]: Refreshing state... [id=processed/]
+module.storage.aws_s3_object.prefix["artifacts/"]: Refreshing state... [id=artifacts/]
+module.storage.aws_s3_object.prefix["features/"]: Refreshing state... [id=features/]
+module.storage.aws_s3_object.prefix["raw/"]: Refreshing state... [id=raw/]
+module.vpc.aws_route_table_association.public: Refreshing state... [id=rtbassoc-042ebad2ebf91761f]
+module.sagemaker.aws_sagemaker_domain.this: Refreshing state... [id=d-4gfybxvoveo4]
+module.sagemaker.aws_sagemaker_user_profile.ml_engineer: Refreshing state... [id=arn:aws:sagemaker:us-east-1:060245184393:user-profile/d-4gfybxvoveo4/MLEngineer]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  ~ update in-place
+
+Terraform will perform the following actions:
+
+  # module.iam.aws_iam_policy.ml_engineer will be updated in-place
+  ~ resource "aws_iam_policy" "ml_engineer" {
+        id               = "arn:aws:iam::060245184393:policy/northstar-dev-MLEngineerPolicy"
+        name             = "northstar-dev-MLEngineerPolicy"
+      ~ policy           = jsonencode(
+          ~ {
+              ~ Statement = [
+                    {
+                        Action   = [
+                            "sagemaker:CreateTrainingJob",
+                            "sagemaker:DescribeTrainingJob",
+                            "sagemaker:StopTrainingJob",
+                            "sagemaker:CreateEndpoint",
+                            "sagemaker:DescribeEndpoint",
+                            "sagemaker:DeleteEndpoint",
+                            "sagemaker:CreateEndpointConfig",
+                            "sagemaker:DeleteEndpointConfig",
+                            "sagemaker:CreateMlflowApp",
+                            "sagemaker:DescribeMlflowApp",
+                            "sagemaker:ListMlflowApps",
+                            "sagemaker:CreatePresignedMlflowAppUrl",
+                            "sagemaker:RegisterModel",
+                            "sagemaker:DescribeModelPackage",
+                            "sagemaker:ListModelPackages",
+                        ]
+                        Effect   = "Allow"
+                        Resource = "*"
+                        Sid      = "SageMakerCore"
+                    },
+                  ~ {
+                      ~ Action   = [
+                            # (8 unchanged elements hidden)
+                            "sagemaker:DeleteSpace",
+                          + "sagemaker:AddTags",
+                            "sagemaker:DescribeApp",
+                            # (4 unchanged elements hidden)
+                        ]
+                        # (3 unchanged attributes hidden)
+                    },
+                    {
+                        Action   = [
+                            "s3:GetObject",
+                            "s3:PutObject",
+                            "s3:DeleteObject",
+                        ]
+                        Effect   = "Allow"
+                        Resource = [
+                            "arn:aws:s3:::northstar-dev-data-060245184393/artifacts/*",
+                            "arn:aws:s3:::northstar-dev-data-060245184393/features/*",
+                        ]
+                        Sid      = "S3ArtifactsAndFeatures"
+                    },
+                    # (3 unchanged elements hidden)
+                ]
+                # (1 unchanged attribute hidden)
+            }
+        )
+        tags             = {}
+        # (7 unchanged attributes hidden)
+    }
+
+  # module.sagemaker.aws_sagemaker_domain.this will be updated in-place
+  ~ resource "aws_sagemaker_domain" "this" {
+        id                                             = "d-4gfybxvoveo4"
+        tags                                           = {
+            "Name" = "northstar-dev-domain"
+        }
+        # (15 unchanged attributes hidden)
+
+      ~ default_user_settings {
+            # (5 unchanged attributes hidden)
+
+          - studio_web_portal_settings {}
+
+            # (1 unchanged block hidden)
+        }
+
+        # (1 unchanged block hidden)
+    }
+
+Plan: 0 to add, 2 to change, 0 to destroy.
+module.iam.aws_iam_policy.ml_engineer: Modifying... [id=arn:aws:iam::060245184393:policy/northstar-dev-MLEngineerPolicy]
+module.sagemaker.aws_sagemaker_domain.this: Modifying... [id=d-4gfybxvoveo4]
+module.iam.aws_iam_policy.ml_engineer: Modifications complete after 0s [id=arn:aws:iam::060245184393:policy/northstar-dev-MLEngineerPolicy]
+module.sagemaker.aws_sagemaker_domain.this: Modifications complete after 1s [id=d-4gfybxvoveo4]
+
+Apply complete! Resources: 0 added, 2 changed, 0 destroyed.
+
+Outputs:
+
+ml_engineer_role_arn = "arn:aws:iam::060245184393:role/northstar-dev-MLEngineer"
+public_subnet_id = "subnet-013dffbc5997fa128"
+s3_bucket_name = "northstar-dev-data-060245184393"
+sagemaker_domain_id = "d-4gfybxvoveo4"
+vpc_id = "vpc-0ecb320c0d3ac1bda"

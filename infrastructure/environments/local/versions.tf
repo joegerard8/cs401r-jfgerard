@@ -1,9 +1,4 @@
-# ── environments/local ───────────────────────────────────────────────────────
-# Same modules as environments/dev, pointed at LocalStack instead of AWS.
-# Nothing here costs money. Used only by Task B5 (make local-validate).
-#
-# Do not add a backend block: local state is fine for a throwaway emulator.
-
+# LocalStack provider configuration for validation.
 terraform {
   required_version = ">= 1.5.0"
 
@@ -18,12 +13,11 @@ terraform {
 provider "aws" {
   region = var.aws_region
 
-  # LocalStack accepts any credentials; these keep the provider from reading
-  # your real ~/.aws profile.
+  # LocalStack accepts placeholder credentials.
   access_key = "test"
   secret_key = "test"
 
-  # Skip the calls that only make sense against real AWS.
+  # Skip checks that only apply to real AWS.
   skip_credentials_validation = true
   skip_metadata_api_check     = true
   skip_requesting_account_id  = true

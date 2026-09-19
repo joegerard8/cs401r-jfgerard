@@ -1,0 +1,282 @@
+== LocalStack validation ==
+
+== terraform init ==
+Initializing the backend...
+
+Initializing modules...
+
+Initializing provider plugins...
+- Reusing previous version of hashicorp/aws from the dependency lock file
+- Using previously-installed hashicorp/aws v5.100.0
+
+Terraform has been successfully initialized!
+
+You may now begin working with Terraform. Try running "terraform plan" to see
+any changes that are required for your infrastructure. All Terraform commands
+should now work.
+
+If you ever set or change modules or backend configuration for Terraform,
+rerun this command to reinitialize your working directory. If you forget, other
+commands will detect it and remind you to do so if necessary.
+
+== terraform apply ==
+module.iam.data.aws_caller_identity.current: Reading...
+module.storage.data.aws_caller_identity.current: Reading...
+module.vpc.aws_vpc.this: Refreshing state... [id=vpc-e92502c0374322bd2]
+module.iam.aws_iam_role.ml_engineer: Refreshing state... [id=northstar-local-MLEngineer]
+module.iam.data.aws_caller_identity.current: Read complete after 0s [id=000000000000]
+module.iam.aws_iam_policy.ml_engineer: Refreshing state... [id=arn:aws:iam::000000000000:policy/northstar-local-MLEngineerPolicy]
+module.storage.data.aws_caller_identity.current: Read complete after 0s [id=000000000000]
+module.storage.aws_s3_bucket.data: Refreshing state... [id=northstar-local-data-000000000000]
+module.storage.aws_s3_bucket_public_access_block.data: Refreshing state... [id=northstar-local-data-000000000000]
+module.storage.aws_s3_bucket_versioning.data: Refreshing state... [id=northstar-local-data-000000000000]
+module.storage.aws_s3_bucket_server_side_encryption_configuration.data: Refreshing state... [id=northstar-local-data-000000000000]
+module.storage.aws_s3_object.prefix["raw/"]: Refreshing state... [id=raw/]
+module.storage.aws_s3_object.prefix["features/"]: Refreshing state... [id=features/]
+module.storage.aws_s3_object.prefix["artifacts/"]: Refreshing state... [id=artifacts/]
+module.storage.aws_s3_object.prefix["processed/"]: Refreshing state... [id=processed/]
+module.iam.aws_iam_role_policy_attachment.ml_engineer: Refreshing state... [id=northstar-local-MLEngineer-20260919211805204100000001]
+module.vpc.aws_internet_gateway.this: Refreshing state... [id=igw-1d83b1cb2418d2682]
+module.vpc.aws_subnet.public: Refreshing state... [id=subnet-8688992f511ac277b]
+module.vpc.aws_security_group.this: Refreshing state... [id=sg-22d795b5441d5a7c5]
+module.vpc.aws_route_table.public: Refreshing state... [id=rtb-edb64e086a7533662]
+module.vpc.aws_route_table_association.public: Refreshing state... [id=rtbassoc-ec4c0355bfff9f241]
+
+No changes. Your infrastructure matches the configuration.
+
+Terraform has compared your real infrastructure against your configuration
+and found no differences, so no changes are needed.
+
+Apply complete! Resources: 0 added, 0 changed, 0 destroyed.
+
+Outputs:
+
+ml_engineer_role_arn = "arn:aws:iam::000000000000:role/northstar-local-MLEngineer"
+public_subnet_id = "subnet-8688992f511ac277b"
+s3_bucket_name = "northstar-local-data-000000000000"
+vpc_id = "vpc-e92502c0374322bd2"
+
+Bucket: northstar-local-data-000000000000
+
+== STS identity ==
+{
+    "UserId": "AKIAIOSFODNN7EXAMPLE",
+    "Account": "000000000000",
+    "Arn": "arn:aws:iam::000000000000:root"
+}
+
+== S3 objects ==
+2026-09-19 15:18:06          0 artifacts/
+2026-09-19 15:18:06          0 features/
+2026-09-19 15:18:06          0 processed/
+2026-09-19 15:18:06          0 raw/
+
+== IAM roles ==
+---------------------------------------------------------------------------------------
+|                                      ListRoles                                      |
++-------------------------------------------------------------------------------------+
+||                                       Roles                                       ||
+|+---------------------+-------------------------------------------------------------+|
+||  Arn                |  arn:aws:iam::000000000000:role/northstar-local-MLEngineer  ||
+||  CreateDate         |  2026-09-19T21:18:04.991754+00:00                           ||
+||  MaxSessionDuration |  3600                                                       ||
+||  Path               |  /                                                          ||
+||  RoleId             |  AROAQAAAAAAAIDS5JR3FV                                      ||
+||  RoleName           |  northstar-local-MLEngineer                                 ||
+|+---------------------+-------------------------------------------------------------+|
+|||                            AssumeRolePolicyDocument                             |||
+||+-----------------------------------+---------------------------------------------+||
+|||  Version                          |  2012-10-17                                 |||
+||+-----------------------------------+---------------------------------------------+||
+||||                                   Statement                                   ||||
+|||+---------------------------+---------------------------------------------------+|||
+||||  Action                   |  sts:AssumeRole                                   ||||
+||||  Effect                   |  Allow                                            ||||
+|||+---------------------------+---------------------------------------------------+|||
+|||||                                  Principal                                  |||||
+||||+---------------------+-------------------------------------------------------+||||
+|||||  Service            |  sagemaker.amazonaws.com                              |||||
+||||+---------------------+-------------------------------------------------------+||||
+
+== VPCs ==
+-----------------------------------------------------------
+|                      DescribeVpcs                       |
++---------------------------------------------------------+
+||                         Vpcs                          ||
+|+-----------------------+-------------------------------+|
+||  CidrBlock            |  172.31.0.0/16                ||
+||  DhcpOptionsId        |  default                      ||
+||  InstanceTenancy      |  default                      ||
+||  IsDefault            |  True                         ||
+||  OwnerId              |  000000000000                 ||
+||  State                |  available                    ||
+||  VpcId                |  vpc-61c9080956cac1b92        ||
+|+-----------------------+-------------------------------+|
+|||               CidrBlockAssociationSet               |||
+||+----------------+------------------------------------+||
+|||  AssociationId |  vpc-cidr-assoc-01fd7a26a85f1373f  |||
+|||  CidrBlock     |  172.31.0.0/16                     |||
+||+----------------+------------------------------------+||
+||||                  CidrBlockState                   ||||
+|||+-------------------+-------------------------------+|||
+||||  State            |  associated                   ||||
+|||+-------------------+-------------------------------+|||
+||                         Vpcs                          ||
+|+-----------------------+-------------------------------+|
+||  CidrBlock            |  10.0.0.0/16                  ||
+||  DhcpOptionsId        |  default                      ||
+||  InstanceTenancy      |  default                      ||
+||  IsDefault            |  False                        ||
+||  OwnerId              |  000000000000                 ||
+||  State                |  available                    ||
+||  VpcId                |  vpc-e92502c0374322bd2        ||
+|+-----------------------+-------------------------------+|
+|||               CidrBlockAssociationSet               |||
+||+----------------+------------------------------------+||
+|||  AssociationId |  vpc-cidr-assoc-30ee0b0818ac4ed26  |||
+|||  CidrBlock     |  10.0.0.0/16                       |||
+||+----------------+------------------------------------+||
+||||                  CidrBlockState                   ||||
+|||+-------------------+-------------------------------+|||
+||||  State            |  associated                   ||||
+|||+-------------------+-------------------------------+|||
+|||                        Tags                         |||
+||+--------------------+--------------------------------+||
+|||         Key        |             Value              |||
+||+--------------------+--------------------------------+||
+|||  ManagedBy         |  terraform                     |||
+|||  Name              |  northstar-local-vpc           |||
+|||  Project           |  northstar                     |||
+|||  Environment       |  local                         |||
+||+--------------------+--------------------------------+||
+
+== Subnets ==
+---------------------------------------------------------------------------------------------------------
+|                                            DescribeSubnets                                            |
++-------------------------------------------------------------------------------------------------------+
+||                                               Subnets                                               ||
+|+------------------------------+----------------------------------------------------------------------+|
+||  AssignIpv6AddressOnCreation |  False                                                               ||
+||  AvailabilityZone            |  us-east-1a                                                          ||
+||  AvailabilityZoneId          |  use1-az6                                                            ||
+||  AvailableIpAddressCount     |  4091                                                                ||
+||  CidrBlock                   |  172.31.0.0/20                                                       ||
+||  DefaultForAz                |  True                                                                ||
+||  Ipv6Native                  |  False                                                               ||
+||  MapPublicIpOnLaunch         |  True                                                                ||
+||  OwnerId                     |  000000000000                                                        ||
+||  State                       |  available                                                           ||
+||  SubnetArn                   |  arn:aws:ec2:us-east-1:000000000000:subnet/subnet-fe2330918bff5d788  ||
+||  SubnetId                    |  subnet-fe2330918bff5d788                                            ||
+||  VpcId                       |  vpc-61c9080956cac1b92                                               ||
+|+------------------------------+----------------------------------------------------------------------+|
+||                                               Subnets                                               ||
+|+------------------------------+----------------------------------------------------------------------+|
+||  AssignIpv6AddressOnCreation |  False                                                               ||
+||  AvailabilityZone            |  us-east-1a                                                          ||
+||  AvailabilityZoneId          |  use1-az6                                                            ||
+||  AvailableIpAddressCount     |  251                                                                 ||
+||  CidrBlock                   |  10.0.100.0/24                                                       ||
+||  DefaultForAz                |  False                                                               ||
+||  Ipv6Native                  |  False                                                               ||
+||  MapPublicIpOnLaunch         |  True                                                                ||
+||  OwnerId                     |  000000000000                                                        ||
+||  State                       |  available                                                           ||
+||  SubnetArn                   |  arn:aws:ec2:us-east-1:000000000000:subnet/subnet-8688992f511ac277b  ||
+||  SubnetId                    |  subnet-8688992f511ac277b                                            ||
+||  VpcId                       |  vpc-e92502c0374322bd2                                               ||
+|+------------------------------+----------------------------------------------------------------------+|
+|||                                   PrivateDnsNameOptionsOnLaunch                                   |||
+||+----------------------------------------------------------+----------------------------------------+||
+|||  HostnameType                                            |  ip-name                               |||
+||+----------------------------------------------------------+----------------------------------------+||
+|||                                               Tags                                                |||
+||+---------------------------------+-----------------------------------------------------------------+||
+|||               Key               |                              Value                              |||
+||+---------------------------------+-----------------------------------------------------------------+||
+|||  ManagedBy                      |  terraform                                                      |||
+|||  Tier                           |  public                                                         |||
+|||  Name                           |  northstar-local-public-1                                       |||
+|||  Project                        |  northstar                                                      |||
+|||  Environment                    |  local                                                          |||
+||+---------------------------------+-----------------------------------------------------------------+||
+||                                               Subnets                                               ||
+|+------------------------------+----------------------------------------------------------------------+|
+||  AssignIpv6AddressOnCreation |  False                                                               ||
+||  AvailabilityZone            |  us-east-1b                                                          ||
+||  AvailabilityZoneId          |  use1-az1                                                            ||
+||  AvailableIpAddressCount     |  4091                                                                ||
+||  CidrBlock                   |  172.31.16.0/20                                                      ||
+||  DefaultForAz                |  True                                                                ||
+||  Ipv6Native                  |  False                                                               ||
+||  MapPublicIpOnLaunch         |  True                                                                ||
+||  OwnerId                     |  000000000000                                                        ||
+||  State                       |  available                                                           ||
+||  SubnetArn                   |  arn:aws:ec2:us-east-1:000000000000:subnet/subnet-e6cf737214592ea20  ||
+||  SubnetId                    |  subnet-e6cf737214592ea20                                            ||
+||  VpcId                       |  vpc-61c9080956cac1b92                                               ||
+|+------------------------------+----------------------------------------------------------------------+|
+||                                               Subnets                                               ||
+|+------------------------------+----------------------------------------------------------------------+|
+||  AssignIpv6AddressOnCreation |  False                                                               ||
+||  AvailabilityZone            |  us-east-1c                                                          ||
+||  AvailabilityZoneId          |  use1-az2                                                            ||
+||  AvailableIpAddressCount     |  4091                                                                ||
+||  CidrBlock                   |  172.31.32.0/20                                                      ||
+||  DefaultForAz                |  True                                                                ||
+||  Ipv6Native                  |  False                                                               ||
+||  MapPublicIpOnLaunch         |  True                                                                ||
+||  OwnerId                     |  000000000000                                                        ||
+||  State                       |  available                                                           ||
+||  SubnetArn                   |  arn:aws:ec2:us-east-1:000000000000:subnet/subnet-1b43b596752aba4b2  ||
+||  SubnetId                    |  subnet-1b43b596752aba4b2                                            ||
+||  VpcId                       |  vpc-61c9080956cac1b92                                               ||
+|+------------------------------+----------------------------------------------------------------------+|
+||                                               Subnets                                               ||
+|+------------------------------+----------------------------------------------------------------------+|
+||  AssignIpv6AddressOnCreation |  False                                                               ||
+||  AvailabilityZone            |  us-east-1d                                                          ||
+||  AvailabilityZoneId          |  use1-az4                                                            ||
+||  AvailableIpAddressCount     |  4091                                                                ||
+||  CidrBlock                   |  172.31.48.0/20                                                      ||
+||  DefaultForAz                |  True                                                                ||
+||  Ipv6Native                  |  False                                                               ||
+||  MapPublicIpOnLaunch         |  True                                                                ||
+||  OwnerId                     |  000000000000                                                        ||
+||  State                       |  available                                                           ||
+||  SubnetArn                   |  arn:aws:ec2:us-east-1:000000000000:subnet/subnet-39a2e16fc09c3a9f3  ||
+||  SubnetId                    |  subnet-39a2e16fc09c3a9f3                                            ||
+||  VpcId                       |  vpc-61c9080956cac1b92                                               ||
+|+------------------------------+----------------------------------------------------------------------+|
+||                                               Subnets                                               ||
+|+------------------------------+----------------------------------------------------------------------+|
+||  AssignIpv6AddressOnCreation |  False                                                               ||
+||  AvailabilityZone            |  us-east-1e                                                          ||
+||  AvailabilityZoneId          |  use1-az3                                                            ||
+||  AvailableIpAddressCount     |  4091                                                                ||
+||  CidrBlock                   |  172.31.64.0/20                                                      ||
+||  DefaultForAz                |  True                                                                ||
+||  Ipv6Native                  |  False                                                               ||
+||  MapPublicIpOnLaunch         |  True                                                                ||
+||  OwnerId                     |  000000000000                                                        ||
+||  State                       |  available                                                           ||
+||  SubnetArn                   |  arn:aws:ec2:us-east-1:000000000000:subnet/subnet-a8f29288902a940dd  ||
+||  SubnetId                    |  subnet-a8f29288902a940dd                                            ||
+||  VpcId                       |  vpc-61c9080956cac1b92                                               ||
+|+------------------------------+----------------------------------------------------------------------+|
+||                                               Subnets                                               ||
+|+------------------------------+----------------------------------------------------------------------+|
+||  AssignIpv6AddressOnCreation |  False                                                               ||
+||  AvailabilityZone            |  us-east-1f                                                          ||
+||  AvailabilityZoneId          |  use1-az5                                                            ||
+||  AvailableIpAddressCount     |  4091                                                                ||
+||  CidrBlock                   |  172.31.80.0/20                                                      ||
+||  DefaultForAz                |  True                                                                ||
+||  Ipv6Native                  |  False                                                               ||
+||  MapPublicIpOnLaunch         |  True                                                                ||
+||  OwnerId                     |  000000000000                                                        ||
+||  State                       |  available                                                           ||
+||  SubnetArn                   |  arn:aws:ec2:us-east-1:000000000000:subnet/subnet-128dbdbcd315460c3  ||
+||  SubnetId                    |  subnet-128dbdbcd315460c3                                            ||
+||  VpcId                       |  vpc-61c9080956cac1b92                                               ||
+|+------------------------------+----------------------------------------------------------------------+|
