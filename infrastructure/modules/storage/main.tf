@@ -43,3 +43,75 @@ resource "aws_s3_object" "prefix" {
   key     = each.value
   content = ""
 }
+
+resource "aws_s3_bucket_lifecycle_configuration" "data" {
+  count  = var.enable_lifecycle_rules ? 1 : 0
+  bucket = aws_s3_bucket.data.id
+
+  depends_on = [aws_s3_bucket_versioning.data]
+
+  rule {
+    id     = "expire-raw-data"
+    status = "Enabled"
+
+    filter {
+      prefix = "raw/"
+    }
+
+    expiration {
+      days = 90
+    }
+  }
+
+  rule {
+    id     = "expire-raw-versions"
+    status = "Enabled"
+
+    filter {
+      prefix = "raw/"
+    }
+
+    noncurrent_version_expiration {
+      noncurrent_days = 30
+    }
+  }
+
+  rule {
+    id     = "expire-processed-versions"
+    status = "Enabled"
+
+    filter {
+      prefix = "processed/"
+    }
+
+    noncurrent_version_expiration {
+      noncurrent_days = 30
+    }
+  }
+
+  rule {
+    id     = "expire-feature-versions"
+    status = "Enabled"
+
+    filter {
+      prefix = "features/"
+    }
+
+    noncurrent_version_expiration {
+      noncurrent_days = 60
+    }
+  }
+
+  rule {
+    id     = "expire-datacapture"
+    status = "Enabled"
+
+    filter {
+      prefix = "datacapture/"
+    }
+
+    expiration {
+      days = 7
+    }
+  }
+}

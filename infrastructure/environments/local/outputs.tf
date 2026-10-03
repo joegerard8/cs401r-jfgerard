@@ -8,6 +8,11 @@ output "public_subnet_id" {
   value       = module.vpc.public_subnet_id
 }
 
+output "private_subnet_id" {
+  description = "ID of the private subnet"
+  value       = module.vpc.private_subnet_id
+}
+
 output "s3_bucket_name" {
   description = "Name of the data bucket"
   value       = module.storage.bucket_name

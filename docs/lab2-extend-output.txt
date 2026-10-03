@@ -1,0 +1,947 @@
+NorthStar Lab 2 - dev
+2026-10-02T05:42:40.744972+00:00
+
+== terraform -chdir=infrastructure/environments/dev apply -input=false -no-color C:\Users\joefg\AppData\Local\Temp\northstar-lab2-dev.tfplan ==
+
+Warning: Deprecated Parameter
+
+The parameter "dynamodb_table" is deprecated. Use parameter "use_lockfile"
+instead.
+module.iam.aws_iam_role.ml_engineer: Creating...
+module.iam.aws_iam_policy.ml_engineer: Creating...
+module.iam.aws_iam_policy.data_engineer: Creating...
+module.vpc.aws_vpc.this: Creating...
+module.iam.aws_iam_role.data_engineer: Creating...
+module.iam.aws_iam_role.model_monitor: Creating...
+module.iam.aws_iam_policy.model_monitor: Creating...
+module.vpc.aws_eip.nat[0]: Creating...
+module.storage.aws_s3_bucket.data: Creating...
+module.iam.aws_iam_policy.ml_engineer: Creation complete after 1s [id=arn:aws:iam::060245184393:policy/northstar-dev-MLEngineerPolicy]
+module.iam.aws_iam_policy.model_monitor: Creation complete after 1s [id=arn:aws:iam::060245184393:policy/northstar-dev-ModelMonitorPolicy]
+module.iam.aws_iam_policy.data_engineer: Creation complete after 1s [id=arn:aws:iam::060245184393:policy/northstar-dev-DataEngineerPolicy]
+module.iam.aws_iam_role.data_engineer: Creation complete after 1s [id=northstar-dev-DataEngineer]
+module.iam.aws_iam_role_policy_attachment.data_engineer: Creating...
+module.iam.aws_iam_role.ml_engineer: Creation complete after 1s [id=northstar-dev-MLEngineer]
+module.iam.aws_iam_role_policy_attachment.ml_engineer: Creating...
+module.iam.aws_iam_role.model_monitor: Creation complete after 1s [id=northstar-dev-ModelMonitor]
+module.iam.aws_iam_role_policy_attachment.model_monitor: Creating...
+module.iam.aws_iam_role_policy_attachment.data_engineer: Creation complete after 0s [id=northstar-dev-DataEngineer-20261002054245744900000001]
+module.iam.aws_iam_role_policy_attachment.ml_engineer: Creation complete after 0s [id=northstar-dev-MLEngineer-20261002054245755800000003]
+module.iam.aws_iam_role_policy_attachment.model_monitor: Creation complete after 0s [id=northstar-dev-ModelMonitor-20261002054245748800000002]
+module.storage.aws_s3_bucket.data: Creation complete after 2s [id=northstar-dev-data-060245184393]
+module.storage.aws_s3_bucket_public_access_block.data: Creating...
+module.storage.aws_s3_bucket_server_side_encryption_configuration.data: Creating...
+module.storage.aws_s3_bucket_versioning.data: Creating...
+module.storage.aws_s3_object.prefix["features/"]: Creating...
+module.storage.aws_s3_object.prefix["raw/"]: Creating...
+module.storage.aws_s3_object.prefix["processed/"]: Creating...
+module.storage.aws_s3_object.prefix["artifacts/"]: Creating...
+module.vpc.aws_eip.nat[0]: Creation complete after 2s [id=eipalloc-0a6183db563033e44]
+module.storage.aws_s3_bucket_public_access_block.data: Creation complete after 0s [id=northstar-dev-data-060245184393]
+module.storage.aws_s3_object.prefix["processed/"]: Creation complete after 0s [id=processed/]
+module.storage.aws_s3_object.prefix["features/"]: Creation complete after 0s [id=features/]
+module.storage.aws_s3_object.prefix["artifacts/"]: Creation complete after 1s [id=artifacts/]
+module.storage.aws_s3_object.prefix["raw/"]: Creation complete after 1s [id=raw/]
+module.storage.aws_s3_bucket_server_side_encryption_configuration.data: Creation complete after 1s [id=northstar-dev-data-060245184393]
+module.storage.aws_s3_bucket_versioning.data: Creation complete after 2s [id=northstar-dev-data-060245184393]
+module.storage.aws_s3_bucket_lifecycle_configuration.data[0]: Creating...
+module.vpc.aws_vpc.this: Still creating... [00m10s elapsed]
+module.vpc.aws_vpc.this: Creation complete after 12s [id=vpc-09bb4cd71bf9b5654]
+module.vpc.aws_internet_gateway.this: Creating...
+module.vpc.aws_subnet.public: Creating...
+module.vpc.aws_subnet.private: Creating...
+module.vpc.aws_security_group.this: Creating...
+module.vpc.aws_internet_gateway.this: Creation complete after 1s [id=igw-022c6c937aad46262]
+module.vpc.aws_route_table.public: Creating...
+module.vpc.aws_subnet.private: Creation complete after 1s [id=subnet-0758104da1b295112]
+module.storage.aws_s3_bucket_lifecycle_configuration.data[0]: Still creating... [00m10s elapsed]
+module.vpc.aws_route_table.public: Creation complete after 1s [id=rtb-000a1104b0f23f60a]
+module.vpc.aws_security_group.this: Creation complete after 4s [id=sg-0e2fc68076474a233]
+module.vpc.aws_subnet.public: Still creating... [00m10s elapsed]
+module.vpc.aws_subnet.public: Creation complete after 12s [id=subnet-07f18e9f1ac7a76a7]
+module.storage.aws_s3_bucket_lifecycle_configuration.data[0]: Still creating... [00m20s elapsed]
+module.vpc.aws_route_table_association.public: Creating...
+module.vpc.aws_route_table_association.public: Creation complete after 1s [id=rtbassoc-0201343c91a9d7965]
+module.vpc.aws_nat_gateway.this[0]: Creating...
+module.storage.aws_s3_bucket_lifecycle_configuration.data[0]: Still creating... [00m30s elapsed]
+module.vpc.aws_nat_gateway.this[0]: Still creating... [00m10s elapsed]
+module.storage.aws_s3_bucket_lifecycle_configuration.data[0]: Still creating... [00m40s elapsed]
+module.vpc.aws_nat_gateway.this[0]: Still creating... [00m20s elapsed]
+module.storage.aws_s3_bucket_lifecycle_configuration.data[0]: Still creating... [00m50s elapsed]
+module.vpc.aws_nat_gateway.this[0]: Still creating... [00m30s elapsed]
+module.storage.aws_s3_bucket_lifecycle_configuration.data[0]: Creation complete after 56s [id=northstar-dev-data-060245184393]
+module.vpc.aws_nat_gateway.this[0]: Still creating... [00m40s elapsed]
+module.vpc.aws_nat_gateway.this[0]: Still creating... [00m50s elapsed]
+module.vpc.aws_nat_gateway.this[0]: Still creating... [01m00s elapsed]
+module.vpc.aws_nat_gateway.this[0]: Still creating... [01m10s elapsed]
+module.vpc.aws_nat_gateway.this[0]: Still creating... [01m20s elapsed]
+module.vpc.aws_nat_gateway.this[0]: Still creating... [01m30s elapsed]
+module.vpc.aws_nat_gateway.this[0]: Still creating... [01m40s elapsed]
+module.vpc.aws_nat_gateway.this[0]: Still creating... [01m50s elapsed]
+module.vpc.aws_nat_gateway.this[0]: Still creating... [02m00s elapsed]
+module.vpc.aws_nat_gateway.this[0]: Creation complete after 2m5s [id=nat-0f50b139744fe306b]
+module.vpc.aws_route_table.private: Creating...
+module.vpc.aws_route_table.private: Creation complete after 2s [id=rtb-0a87aade92e7c5d8d]
+module.vpc.aws_route_table_association.private: Creating...
+module.vpc.aws_route_table_association.private: Creation complete after 0s [id=rtbassoc-0e8d62e6234701620]
+module.sagemaker.aws_sagemaker_domain.this: Creating...
+module.sagemaker.aws_sagemaker_domain.this: Still creating... [00m10s elapsed]
+module.sagemaker.aws_sagemaker_domain.this: Still creating... [00m20s elapsed]
+module.sagemaker.aws_sagemaker_domain.this: Still creating... [00m30s elapsed]
+module.sagemaker.aws_sagemaker_domain.this: Still creating... [00m40s elapsed]
+module.sagemaker.aws_sagemaker_domain.this: Still creating... [00m50s elapsed]
+module.sagemaker.aws_sagemaker_domain.this: Still creating... [01m00s elapsed]
+module.sagemaker.aws_sagemaker_domain.this: Still creating... [01m10s elapsed]
+module.sagemaker.aws_sagemaker_domain.this: Still creating... [01m20s elapsed]
+module.sagemaker.aws_sagemaker_domain.this: Still creating... [01m30s elapsed]
+module.sagemaker.aws_sagemaker_domain.this: Still creating... [01m40s elapsed]
+module.sagemaker.aws_sagemaker_domain.this: Still creating... [01m50s elapsed]
+module.sagemaker.aws_sagemaker_domain.this: Creation complete after 1m55s [id=d-odhtzkzeeqhn]
+module.sagemaker.aws_sagemaker_user_profile.ml_engineer: Creating...
+module.sagemaker.aws_sagemaker_user_profile.ml_engineer: Creation complete after 4s [id=arn:aws:sagemaker:us-east-1:060245184393:user-profile/d-odhtzkzeeqhn/MLEngineer]
+
+Apply complete! Resources: 31 added, 0 changed, 0 destroyed.
+
+Outputs:
+
+ml_engineer_role_arn = "arn:aws:iam::060245184393:role/northstar-dev-MLEngineer"
+private_subnet_id = "subnet-0758104da1b295112"
+public_subnet_id = "subnet-07f18e9f1ac7a76a7"
+s3_bucket_name = "northstar-dev-data-060245184393"
+sagemaker_domain_id = "d-odhtzkzeeqhn"
+vpc_id = "vpc-09bb4cd71bf9b5654"
+
+Warning: Deprecated Parameter
+
+The parameter "dynamodb_table" is deprecated. Use parameter "use_lockfile"
+instead.
+module.iam.data.aws_caller_identity.current: Reading...
+module.glue.aws_glue_catalog_database.this: Refreshing state... [id=060245184393:northstar_dev]
+module.vpc.aws_vpc.this: Refreshing state... [id=vpc-09bb4cd71bf9b5654]
+module.storage.data.aws_caller_identity.current: Reading...
+module.iam.aws_iam_role.ml_engineer: Refreshing state... [id=northstar-dev-MLEngineer]
+module.iam.aws_iam_role.model_monitor: Refreshing state... [id=northstar-dev-ModelMonitor]
+module.iam.aws_iam_role.data_engineer: Refreshing state... [id=northstar-dev-DataEngineer]
+module.storage.data.aws_caller_identity.current: Read complete after 0s [id=060245184393]
+module.storage.aws_s3_bucket.data: Refreshing state... [id=northstar-dev-data-060245184393]
+module.iam.data.aws_caller_identity.current: Read complete after 0s [id=060245184393]
+module.iam.aws_iam_policy.ml_engineer: Refreshing state... [id=arn:aws:iam::060245184393:policy/northstar-dev-MLEngineerPolicy]
+module.iam.aws_iam_policy.data_engineer: Refreshing state... [id=arn:aws:iam::060245184393:policy/northstar-dev-DataEngineerPolicy]
+module.iam.aws_iam_policy.model_monitor: Refreshing state... [id=arn:aws:iam::060245184393:policy/northstar-dev-ModelMonitorPolicy]
+module.iam.aws_iam_role_policy_attachment.ml_engineer: Refreshing state... [id=northstar-dev-MLEngineer-20261002054245755800000003]
+module.iam.aws_iam_role_policy_attachment.data_engineer: Refreshing state... [id=northstar-dev-DataEngineer-20261002054245744900000001]
+module.iam.aws_iam_role_policy_attachment.model_monitor: Refreshing state... [id=northstar-dev-ModelMonitor-20261002054245748800000002]
+module.vpc.aws_internet_gateway.this: Refreshing state... [id=igw-022c6c937aad46262]
+module.vpc.aws_subnet.public: Refreshing state... [id=subnet-07f18e9f1ac7a76a7]
+module.vpc.aws_subnet.private: Refreshing state... [id=subnet-0758104da1b295112]
+module.vpc.aws_security_group.this: Refreshing state... [id=sg-0e2fc68076474a233]
+module.storage.aws_s3_bucket_public_access_block.data: Refreshing state... [id=northstar-dev-data-060245184393]
+module.storage.aws_s3_bucket_versioning.data: Refreshing state... [id=northstar-dev-data-060245184393]
+module.storage.aws_s3_bucket_server_side_encryption_configuration.data: Refreshing state... [id=northstar-dev-data-060245184393]
+module.storage.aws_s3_object.prefix["raw/"]: Refreshing state... [id=raw/]
+module.storage.aws_s3_object.prefix["features/"]: Refreshing state... [id=features/]
+module.storage.aws_s3_object.prefix["processed/"]: Refreshing state... [id=processed/]
+module.storage.aws_s3_object.prefix["artifacts/"]: Refreshing state... [id=artifacts/]
+module.glue.aws_s3_object.transform_script: Refreshing state... [id=artifacts/glue/transform.py]
+module.glue.aws_glue_crawler.raw: Refreshing state... [id=northstar-dev-raw-crawler]
+module.vpc.aws_route_table.public: Refreshing state... [id=rtb-000a1104b0f23f60a]
+module.glue.aws_glue_connection.vpc: Refreshing state... [id=060245184393:northstar-dev-vpc]
+module.vpc.aws_route_table_association.public: Refreshing state... [id=rtbassoc-0201343c91a9d7965]
+module.glue.aws_glue_job.transform: Refreshing state... [id=northstar-dev-transform]
+module.storage.aws_s3_bucket_lifecycle_configuration.data[0]: Refreshing state... [id=northstar-dev-data-060245184393]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  + create
+  ~ update in-place
+-/+ destroy and then create replacement
+
+Terraform will perform the following actions:
+
+  # module.glue.aws_glue_connection.vpc must be replaced
+-/+ resource "aws_glue_connection" "vpc" {
+      ~ arn                   = "arn:aws:glue:us-east-1:060245184393:connection/northstar-dev-vpc" -> (known after apply)
+      - athena_properties     = (sensitive value) -> null
+      ~ catalog_id            = "060245184393" -> (known after apply)
+      - connection_properties = (sensitive value) -> null
+      ~ id                    = "060245184393:northstar-dev-vpc" -> (known after apply)
+      - match_criteria        = [] -> null
+      ~ name                  = "northstar-dev-vpc" -> "northstar-dev-vpc-connection" # forces replacement
+      - tags                  = {} -> null
+        # (3 unchanged attributes hidden)
+
+        # (1 unchanged block hidden)
+    }
+
+  # module.glue.aws_glue_job.transform will be updated in-place
+  ~ resource "aws_glue_job" "transform" {
+      ~ connections               = [
+          ~ "northstar-dev-vpc" -> "northstar-dev-vpc-connection",
+        ]
+        id                        = "northstar-dev-transform"
+        name                      = "northstar-dev-transform"
+        tags                      = {}
+        # (16 unchanged attributes hidden)
+
+        # (2 unchanged blocks hidden)
+    }
+
+  # module.iam.aws_iam_policy.data_engineer will be updated in-place
+  ~ resource "aws_iam_policy" "data_engineer" {
+        id               = "arn:aws:iam::060245184393:policy/northstar-dev-DataEngineerPolicy"
+        name             = "northstar-dev-DataEngineerPolicy"
+      ~ policy           = jsonencode(
+          ~ {
+              ~ Statement = [
+                    # (4 unchanged elements hidden)
+                    {
+                        Action   = [
+                            "s3:GetObject",
+                        ]
+                        Effect   = "Allow"
+                        Resource = "arn:aws:s3:::northstar-dev-data-060245184393/artifacts/glue/*"
+                        Sid      = "GlueScripts"
+                    },
+                  ~ {
+                      ~ Action   = [
+                            "s3:GetBucketLocation",
+                          + "s3:GetBucketAcl",
+                        ]
+                      ~ Sid      = "S3BucketLocation" -> "S3BucketLocationAndAcl"
+                        # (2 unchanged attributes hidden)
+                    },
+                  + {
+                      + Action   = [
+                          + "s3:PutObjectAcl",
+                        ]
+                      + Effect   = "Allow"
+                      + Resource = "arn:aws:s3:::northstar-dev-data-060245184393/features/*"
+                      + Sid      = "FeatureStoreOfflineAcl"
+                    },
+                    {
+                        Action    = [
+                            "s3:ListBucket",
+                        ]
+                        Condition = {
+                            StringLike = {
+                                "s3:prefix" = [
+                                    "raw/*",
+                                    "processed/*",
+                                    "features/*",
+                                    "artifacts/glue/*",
+                                ]
+                            }
+                        }
+                        Effect    = "Allow"
+                        Resource  = "arn:aws:s3:::northstar-dev-data-060245184393"
+                        Sid       = "S3BucketList"
+                    },
+                    # (2 unchanged elements hidden)
+                ]
+                # (1 unchanged attribute hidden)
+            }
+        )
+        tags             = {}
+        # (7 unchanged attributes hidden)
+    }
+
+  # module.sagemaker.aws_sagemaker_domain.this will be created
+  + resource "aws_sagemaker_domain" "this" {
+      + app_network_access_type                        = "VpcOnly"
+      + arn                                            = (known after apply)
+      + auth_mode                                      = "IAM"
+      + domain_name                                    = "northstar-dev-domain"
+      + home_efs_file_system_id                        = (known after apply)
+      + id                                             = (known after apply)
+      + security_group_id_for_domain_boundary          = (known after apply)
+      + single_sign_on_application_arn                 = (known after apply)
+      + single_sign_on_managed_application_instance_id = (known after apply)
+      + subnet_ids                                     = [
+          + "subnet-0758104da1b295112",
+        ]
+      + tag_propagation                                = "DISABLED"
+      + tags                                           = {
+          + "Name" = "northstar-dev-domain"
+        }
+      + tags_all                                       = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "terraform"
+          + "Name"        = "northstar-dev-domain"
+          + "Project"     = "northstar"
+        }
+      + url                                            = (known after apply)
+      + vpc_id                                         = "vpc-09bb4cd71bf9b5654"
+
+      + default_user_settings {
+          + auto_mount_home_efs = (known after apply)
+          + default_landing_uri = (known after apply)
+          + execution_role      = "arn:aws:iam::060245184393:role/northstar-dev-MLEngineer"
+          + security_groups     = [
+              + "sg-0e2fc68076474a233",
+            ]
+          + studio_web_portal   = (known after apply)
+
+          + kernel_gateway_app_settings {
+              + default_resource_spec {
+                  + instance_type = "ml.t3.medium"
+                }
+            }
+
+          + space_storage_settings (known after apply)
+
+          + studio_web_portal_settings {}
+        }
+
+      + retention_policy {
+          + home_efs_file_system = "Delete"
+        }
+    }
+
+  # module.sagemaker.aws_sagemaker_user_profile.ml_engineer will be created
+  + resource "aws_sagemaker_user_profile" "ml_engineer" {
+      + arn                      = (known after apply)
+      + domain_id                = (known after apply)
+      + home_efs_file_system_uid = (known after apply)
+      + id                       = (known after apply)
+      + tags                     = {
+          + "Name" = "northstar-dev-MLEngineer"
+        }
+      + tags_all                 = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "terraform"
+          + "Name"        = "northstar-dev-MLEngineer"
+          + "Project"     = "northstar"
+        }
+      + user_profile_name        = "MLEngineer"
+
+      + user_settings {
+          + auto_mount_home_efs = (known after apply)
+          + execution_role      = "arn:aws:iam::060245184393:role/northstar-dev-MLEngineer"
+          + security_groups     = [
+              + "sg-0e2fc68076474a233",
+            ]
+          + studio_web_portal   = (known after apply)
+
+          + space_storage_settings (known after apply)
+        }
+    }
+
+  # module.vpc.aws_eip.nat[0] will be created
+  + resource "aws_eip" "nat" {
+      + allocation_id        = (known after apply)
+      + arn                  = (known after apply)
+      + association_id       = (known after apply)
+      + carrier_ip           = (known after apply)
+      + customer_owned_ip    = (known after apply)
+      + domain               = "vpc"
+      + id                   = (known after apply)
+      + instance             = (known after apply)
+      + ipam_pool_id         = (known after apply)
+      + network_border_group = (known after apply)
+      + network_interface    = (known after apply)
+      + private_dns          = (known after apply)
+      + private_ip           = (known after apply)
+      + ptr_record           = (known after apply)
+      + public_dns           = (known after apply)
+      + public_ip            = (known after apply)
+      + public_ipv4_pool     = (known after apply)
+      + tags                 = {
+          + "Name" = "northstar-dev-eip"
+        }
+      + tags_all             = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "terraform"
+          + "Name"        = "northstar-dev-eip"
+          + "Project"     = "northstar"
+        }
+      + vpc                  = (known after apply)
+    }
+
+  # module.vpc.aws_nat_gateway.this[0] will be created
+  + resource "aws_nat_gateway" "this" {
+      + allocation_id                      = (known after apply)
+      + association_id                     = (known after apply)
+      + connectivity_type                  = "public"
+      + id                                 = (known after apply)
+      + network_interface_id               = (known after apply)
+      + private_ip                         = (known after apply)
+      + public_ip                          = (known after apply)
+      + secondary_private_ip_address_count = (known after apply)
+      + secondary_private_ip_addresses     = (known after apply)
+      + subnet_id                          = "subnet-07f18e9f1ac7a76a7"
+      + tags                               = {
+          + "Name" = "northstar-dev-nat"
+        }
+      + tags_all                           = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "terraform"
+          + "Name"        = "northstar-dev-nat"
+          + "Project"     = "northstar"
+        }
+    }
+
+  # module.vpc.aws_route_table.private will be created
+  + resource "aws_route_table" "private" {
+      + arn              = (known after apply)
+      + id               = (known after apply)
+      + owner_id         = (known after apply)
+      + propagating_vgws = (known after apply)
+      + route            = [
+          + {
+              + cidr_block                 = "0.0.0.0/0"
+              + nat_gateway_id             = (known after apply)
+                # (11 unchanged attributes hidden)
+            },
+        ]
+      + tags             = {
+          + "Name" = "northstar-dev-private-rt"
+        }
+      + tags_all         = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "terraform"
+          + "Name"        = "northstar-dev-private-rt"
+          + "Project"     = "northstar"
+        }
+      + vpc_id           = "vpc-09bb4cd71bf9b5654"
+    }
+
+  # module.vpc.aws_route_table_association.private will be created
+  + resource "aws_route_table_association" "private" {
+      + id             = (known after apply)
+      + route_table_id = (known after apply)
+      + subnet_id      = "subnet-0758104da1b295112"
+    }
+
+Plan: 7 to add, 2 to change, 1 to destroy.
+
+Changes to Outputs:
+  ~ sagemaker_domain_id     = "d-odhtzkzeeqhn" -> (known after apply)
+module.glue.aws_glue_connection.vpc: Destroying... [id=060245184393:northstar-dev-vpc]
+module.vpc.aws_eip.nat[0]: Creating...
+module.iam.aws_iam_policy.data_engineer: Modifying... [id=arn:aws:iam::060245184393:policy/northstar-dev-DataEngineerPolicy]
+module.glue.aws_glue_connection.vpc: Destruction complete after 1s
+module.glue.aws_glue_connection.vpc: Creating...
+module.iam.aws_iam_policy.data_engineer: Modifications complete after 1s [id=arn:aws:iam::060245184393:policy/northstar-dev-DataEngineerPolicy]
+module.glue.aws_glue_connection.vpc: Creation complete after 0s [id=060245184393:northstar-dev-vpc-connection]
+module.glue.aws_glue_job.transform: Modifying... [id=northstar-dev-transform]
+module.glue.aws_glue_job.transform: Modifications complete after 1s [id=northstar-dev-transform]
+module.vpc.aws_eip.nat[0]: Creation complete after 3s [id=eipalloc-04c10c0f8c30f1e6f]
+module.vpc.aws_nat_gateway.this[0]: Creating...
+module.vpc.aws_nat_gateway.this[0]: Still creating... [00m10s elapsed]
+module.vpc.aws_nat_gateway.this[0]: Still creating... [00m20s elapsed]
+module.vpc.aws_nat_gateway.this[0]: Still creating... [00m30s elapsed]
+module.vpc.aws_nat_gateway.this[0]: Still creating... [00m40s elapsed]
+module.vpc.aws_nat_gateway.this[0]: Still creating... [00m50s elapsed]
+module.vpc.aws_nat_gateway.this[0]: Still creating... [01m00s elapsed]
+module.vpc.aws_nat_gateway.this[0]: Still creating... [01m10s elapsed]
+module.vpc.aws_nat_gateway.this[0]: Still creating... [01m20s elapsed]
+module.vpc.aws_nat_gateway.this[0]: Creation complete after 1m24s [id=nat-0fd1308597d7a6fa1]
+module.vpc.aws_route_table.private: Creating...
+module.vpc.aws_route_table.private: Creation complete after 1s [id=rtb-0ed6a972b66b6e115]
+module.vpc.aws_route_table_association.private: Creating...
+module.vpc.aws_route_table_association.private: Creation complete after 1s [id=rtbassoc-0f3f0d6e9af6c4cfd]
+module.sagemaker.aws_sagemaker_domain.this: Creating...
+module.sagemaker.aws_sagemaker_domain.this: Still creating... [00m10s elapsed]
+module.sagemaker.aws_sagemaker_domain.this: Still creating... [00m20s elapsed]
+module.sagemaker.aws_sagemaker_domain.this: Still creating... [00m30s elapsed]
+module.sagemaker.aws_sagemaker_domain.this: Still creating... [00m40s elapsed]
+module.sagemaker.aws_sagemaker_domain.this: Still creating... [00m50s elapsed]
+module.sagemaker.aws_sagemaker_domain.this: Still creating... [01m00s elapsed]
+module.sagemaker.aws_sagemaker_domain.this: Still creating... [01m10s elapsed]
+module.sagemaker.aws_sagemaker_domain.this: Still creating... [01m20s elapsed]
+module.sagemaker.aws_sagemaker_domain.this: Still creating... [01m30s elapsed]
+module.sagemaker.aws_sagemaker_domain.this: Still creating... [01m40s elapsed]
+module.sagemaker.aws_sagemaker_domain.this: Still creating... [01m50s elapsed]
+module.sagemaker.aws_sagemaker_domain.this: Creation complete after 1m55s [id=d-4irnau1yvugk]
+module.sagemaker.aws_sagemaker_user_profile.ml_engineer: Creating...
+module.sagemaker.aws_sagemaker_user_profile.ml_engineer: Creation complete after 4s [id=arn:aws:sagemaker:us-east-1:060245184393:user-profile/d-4irnau1yvugk/MLEngineer]
+
+Apply complete! Resources: 7 added, 2 changed, 1 destroyed.
+
+Outputs:
+
+glue_crawler_name = "northstar-dev-raw-crawler"
+glue_database_name = "northstar_dev"
+glue_transform_job_name = "northstar-dev-transform"
+ml_engineer_role_arn = "arn:aws:iam::060245184393:role/northstar-dev-MLEngineer"
+private_subnet_id = "subnet-0758104da1b295112"
+public_subnet_id = "subnet-07f18e9f1ac7a76a7"
+s3_bucket_name = "northstar-dev-data-060245184393"
+sagemaker_domain_id = "d-4irnau1yvugk"
+vpc_id = "vpc-09bb4cd71bf9b5654"
+
+Warning: Deprecated Parameter
+
+The parameter "dynamodb_table" is deprecated. Use parameter "use_lockfile"
+instead.
+module.storage.data.aws_caller_identity.current: Reading...
+module.iam.data.aws_caller_identity.current: Reading...
+module.iam.aws_iam_role.data_engineer: Refreshing state... [id=northstar-dev-DataEngineer]
+module.glue.aws_glue_catalog_database.this: Refreshing state... [id=060245184393:northstar_dev]
+module.vpc.aws_eip.nat[0]: Refreshing state... [id=eipalloc-04c10c0f8c30f1e6f]
+module.vpc.aws_vpc.this: Refreshing state... [id=vpc-09bb4cd71bf9b5654]
+module.iam.aws_iam_role.model_monitor: Refreshing state... [id=northstar-dev-ModelMonitor]
+module.iam.aws_iam_role.ml_engineer: Refreshing state... [id=northstar-dev-MLEngineer]
+module.storage.data.aws_caller_identity.current: Read complete after 0s [id=060245184393]
+module.storage.aws_s3_bucket.data: Refreshing state... [id=northstar-dev-data-060245184393]
+module.iam.data.aws_caller_identity.current: Read complete after 0s [id=060245184393]
+module.iam.aws_iam_policy.ml_engineer: Refreshing state... [id=arn:aws:iam::060245184393:policy/northstar-dev-MLEngineerPolicy]
+module.iam.aws_iam_policy.model_monitor: Refreshing state... [id=arn:aws:iam::060245184393:policy/northstar-dev-ModelMonitorPolicy]
+module.iam.aws_iam_policy.data_engineer: Refreshing state... [id=arn:aws:iam::060245184393:policy/northstar-dev-DataEngineerPolicy]
+module.iam.aws_iam_role_policy_attachment.ml_engineer: Refreshing state... [id=northstar-dev-MLEngineer-20261002054245755800000003]
+module.iam.aws_iam_role_policy_attachment.data_engineer: Refreshing state... [id=northstar-dev-DataEngineer-20261002054245744900000001]
+module.iam.aws_iam_role_policy_attachment.model_monitor: Refreshing state... [id=northstar-dev-ModelMonitor-20261002054245748800000002]
+module.vpc.aws_subnet.public: Refreshing state... [id=subnet-07f18e9f1ac7a76a7]
+module.vpc.aws_subnet.private: Refreshing state... [id=subnet-0758104da1b295112]
+module.vpc.aws_internet_gateway.this: Refreshing state... [id=igw-022c6c937aad46262]
+module.vpc.aws_security_group.this: Refreshing state... [id=sg-0e2fc68076474a233]
+module.vpc.aws_route_table.public: Refreshing state... [id=rtb-000a1104b0f23f60a]
+module.storage.aws_s3_bucket_versioning.data: Refreshing state... [id=northstar-dev-data-060245184393]
+module.storage.aws_s3_bucket_server_side_encryption_configuration.data: Refreshing state... [id=northstar-dev-data-060245184393]
+module.storage.aws_s3_object.prefix["features/"]: Refreshing state... [id=features/]
+module.storage.aws_s3_object.prefix["raw/"]: Refreshing state... [id=raw/]
+module.storage.aws_s3_object.prefix["processed/"]: Refreshing state... [id=processed/]
+module.storage.aws_s3_object.prefix["artifacts/"]: Refreshing state... [id=artifacts/]
+module.storage.aws_s3_bucket_public_access_block.data: Refreshing state... [id=northstar-dev-data-060245184393]
+module.glue.aws_s3_object.transform_script: Refreshing state... [id=artifacts/glue/transform.py]
+module.glue.aws_glue_crawler.raw: Refreshing state... [id=northstar-dev-raw-crawler]
+module.glue.aws_glue_connection.vpc: Refreshing state... [id=060245184393:northstar-dev-vpc-connection]
+module.vpc.aws_route_table_association.public: Refreshing state... [id=rtbassoc-0201343c91a9d7965]
+module.vpc.aws_nat_gateway.this[0]: Refreshing state... [id=nat-0fd1308597d7a6fa1]
+module.glue.aws_glue_job.transform: Refreshing state... [id=northstar-dev-transform]
+module.vpc.aws_route_table.private: Refreshing state... [id=rtb-0ed6a972b66b6e115]
+module.vpc.aws_route_table_association.private: Refreshing state... [id=rtbassoc-0f3f0d6e9af6c4cfd]
+module.sagemaker.aws_sagemaker_domain.this: Refreshing state... [id=d-4irnau1yvugk]
+module.sagemaker.aws_sagemaker_user_profile.ml_engineer: Refreshing state... [id=arn:aws:sagemaker:us-east-1:060245184393:user-profile/d-4irnau1yvugk/MLEngineer]
+module.storage.aws_s3_bucket_lifecycle_configuration.data[0]: Refreshing state... [id=northstar-dev-data-060245184393]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  ~ update in-place
+
+Terraform will perform the following actions:
+
+  # module.iam.aws_iam_policy.data_engineer will be updated in-place
+  ~ resource "aws_iam_policy" "data_engineer" {
+        id               = "arn:aws:iam::060245184393:policy/northstar-dev-DataEngineerPolicy"
+        name             = "northstar-dev-DataEngineerPolicy"
+      ~ policy           = jsonencode(
+          ~ {
+              ~ Statement = [
+                    # (6 unchanged elements hidden)
+                    {
+                        Action   = [
+                            "s3:PutObjectAcl",
+                        ]
+                        Effect   = "Allow"
+                        Resource = "arn:aws:s3:::northstar-dev-data-060245184393/features/*"
+                        Sid      = "FeatureStoreOfflineAcl"
+                    },
+                  ~ {
+                      - Condition = {
+                          - StringLike = {
+                              - "s3:prefix" = [
+                                  - "raw/*",
+                                  - "processed/*",
+                                  - "features/*",
+                                  - "artifacts/glue/*",
+                                ]
+                            }
+                        }
+                        # (4 unchanged attributes hidden)
+                    },
+                    {
+                        Action   = [
+                            "sagemaker:PutRecord",
+                            "sagemaker:CreateFeatureGroup",
+                            "sagemaker:DescribeFeatureGroup",
+                        ]
+                        Effect   = "Allow"
+                        Resource = "arn:aws:sagemaker:*:060245184393:feature-group/northstar-dev-*"
+                        Sid      = "FeatureStore"
+                    },
+                    # (1 unchanged element hidden)
+                ]
+                # (1 unchanged attribute hidden)
+            }
+        )
+        tags             = {}
+        # (7 unchanged attributes hidden)
+    }
+
+Plan: 0 to add, 1 to change, 0 to destroy.
+module.iam.aws_iam_policy.data_engineer: Modifying... [id=arn:aws:iam::060245184393:policy/northstar-dev-DataEngineerPolicy]
+module.iam.aws_iam_policy.data_engineer: Modifications complete after 1s [id=arn:aws:iam::060245184393:policy/northstar-dev-DataEngineerPolicy]
+
+Apply complete! Resources: 0 added, 1 changed, 0 destroyed.
+
+Outputs:
+
+glue_crawler_name = "northstar-dev-raw-crawler"
+glue_database_name = "northstar_dev"
+glue_transform_job_name = "northstar-dev-transform"
+ml_engineer_role_arn = "arn:aws:iam::060245184393:role/northstar-dev-MLEngineer"
+private_subnet_id = "subnet-0758104da1b295112"
+public_subnet_id = "subnet-07f18e9f1ac7a76a7"
+s3_bucket_name = "northstar-dev-data-060245184393"
+sagemaker_domain_id = "d-4irnau1yvugk"
+vpc_id = "vpc-09bb4cd71bf9b5654"
+
+Warning: Deprecated Parameter
+
+The parameter "dynamodb_table" is deprecated. Use parameter "use_lockfile"
+instead.
+module.storage.data.aws_caller_identity.current: Reading...
+module.iam.data.aws_caller_identity.current: Reading...
+module.iam.aws_iam_role.model_monitor: Refreshing state... [id=northstar-dev-ModelMonitor]
+module.iam.aws_iam_role.ml_engineer: Refreshing state... [id=northstar-dev-MLEngineer]
+module.vpc.aws_vpc.this: Refreshing state... [id=vpc-09bb4cd71bf9b5654]
+module.iam.aws_iam_role.data_engineer: Refreshing state... [id=northstar-dev-DataEngineer]
+module.vpc.aws_eip.nat[0]: Refreshing state... [id=eipalloc-04c10c0f8c30f1e6f]
+module.glue.aws_glue_catalog_database.this: Refreshing state... [id=060245184393:northstar_dev]
+module.storage.data.aws_caller_identity.current: Read complete after 0s [id=060245184393]
+module.storage.aws_s3_bucket.data: Refreshing state... [id=northstar-dev-data-060245184393]
+module.iam.data.aws_caller_identity.current: Read complete after 0s [id=060245184393]
+module.iam.aws_iam_policy.ml_engineer: Refreshing state... [id=arn:aws:iam::060245184393:policy/northstar-dev-MLEngineerPolicy]
+module.iam.aws_iam_policy.model_monitor: Refreshing state... [id=arn:aws:iam::060245184393:policy/northstar-dev-ModelMonitorPolicy]
+module.iam.aws_iam_policy.data_engineer: Refreshing state... [id=arn:aws:iam::060245184393:policy/northstar-dev-DataEngineerPolicy]
+module.iam.aws_iam_role_policy_attachment.model_monitor: Refreshing state... [id=northstar-dev-ModelMonitor-20261002054245748800000002]
+module.iam.aws_iam_role_policy_attachment.ml_engineer: Refreshing state... [id=northstar-dev-MLEngineer-20261002054245755800000003]
+module.iam.aws_iam_role_policy_attachment.data_engineer: Refreshing state... [id=northstar-dev-DataEngineer-20261002054245744900000001]
+module.vpc.aws_internet_gateway.this: Refreshing state... [id=igw-022c6c937aad46262]
+module.vpc.aws_subnet.public: Refreshing state... [id=subnet-07f18e9f1ac7a76a7]
+module.vpc.aws_subnet.private: Refreshing state... [id=subnet-0758104da1b295112]
+module.vpc.aws_security_group.this: Refreshing state... [id=sg-0e2fc68076474a233]
+module.vpc.aws_route_table.public: Refreshing state... [id=rtb-000a1104b0f23f60a]
+module.glue.aws_glue_connection.vpc: Refreshing state... [id=060245184393:northstar-dev-vpc-connection]
+module.vpc.aws_route_table_association.public: Refreshing state... [id=rtbassoc-0201343c91a9d7965]
+module.storage.aws_s3_bucket_public_access_block.data: Refreshing state... [id=northstar-dev-data-060245184393]
+module.storage.aws_s3_bucket_server_side_encryption_configuration.data: Refreshing state... [id=northstar-dev-data-060245184393]
+module.storage.aws_s3_bucket_versioning.data: Refreshing state... [id=northstar-dev-data-060245184393]
+module.storage.aws_s3_object.prefix["processed/"]: Refreshing state... [id=processed/]
+module.storage.aws_s3_object.prefix["features/"]: Refreshing state... [id=features/]
+module.storage.aws_s3_object.prefix["raw/"]: Refreshing state... [id=raw/]
+module.glue.aws_s3_object.transform_script: Refreshing state... [id=artifacts/glue/transform.py]
+module.storage.aws_s3_object.prefix["artifacts/"]: Refreshing state... [id=artifacts/]
+module.glue.aws_glue_crawler.raw: Refreshing state... [id=northstar-dev-raw-crawler]
+module.vpc.aws_nat_gateway.this[0]: Refreshing state... [id=nat-0fd1308597d7a6fa1]
+module.vpc.aws_route_table.private: Refreshing state... [id=rtb-0ed6a972b66b6e115]
+module.vpc.aws_route_table_association.private: Refreshing state... [id=rtbassoc-0f3f0d6e9af6c4cfd]
+module.glue.aws_glue_job.transform: Refreshing state... [id=northstar-dev-transform]
+module.sagemaker.aws_sagemaker_domain.this: Refreshing state... [id=d-4irnau1yvugk]
+module.sagemaker.aws_sagemaker_user_profile.ml_engineer: Refreshing state... [id=arn:aws:sagemaker:us-east-1:060245184393:user-profile/d-4irnau1yvugk/MLEngineer]
+module.storage.aws_s3_bucket_lifecycle_configuration.data[0]: Refreshing state... [id=northstar-dev-data-060245184393]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  ~ update in-place
+
+Terraform will perform the following actions:
+
+  # module.iam.aws_iam_policy.data_engineer will be updated in-place
+  ~ resource "aws_iam_policy" "data_engineer" {
+        id               = "arn:aws:iam::060245184393:policy/northstar-dev-DataEngineerPolicy"
+        name             = "northstar-dev-DataEngineerPolicy"
+      ~ policy           = jsonencode(
+          ~ {
+              ~ Statement = [
+                    # (2 unchanged elements hidden)
+                    {
+                        Action   = [
+                            "ec2:CreateTags",
+                            "ec2:DeleteTags",
+                        ]
+                        Effect   = "Allow"
+                        Resource = "arn:aws:ec2:*:060245184393:network-interface/*"
+                        Sid      = "NetworkInterfaceTags"
+                    },
+                  ~ {
+                      ~ Resource = [
+                            # (2 unchanged elements hidden)
+                            "arn:aws:s3:::northstar-dev-data-060245184393/features/*",
+                          + "arn:aws:s3:::northstar-dev-data-060245184393/raw_$folder$",
+                          + "arn:aws:s3:::northstar-dev-data-060245184393/processed_$folder$",
+                          + "arn:aws:s3:::northstar-dev-data-060245184393/features_$folder$",
+                        ]
+                        # (3 unchanged attributes hidden)
+                    },
+                    {
+                        Action   = [
+                            "s3:GetObject",
+                        ]
+                        Effect   = "Allow"
+                        Resource = "arn:aws:s3:::northstar-dev-data-060245184393/artifacts/glue/*"
+                        Sid      = "GlueScripts"
+                    },
+                    # (5 unchanged elements hidden)
+                ]
+                # (1 unchanged attribute hidden)
+            }
+        )
+        tags             = {}
+        # (7 unchanged attributes hidden)
+    }
+
+Plan: 0 to add, 1 to change, 0 to destroy.
+module.iam.aws_iam_policy.data_engineer: Modifying... [id=arn:aws:iam::060245184393:policy/northstar-dev-DataEngineerPolicy]
+module.iam.aws_iam_policy.data_engineer: Modifications complete after 0s [id=arn:aws:iam::060245184393:policy/northstar-dev-DataEngineerPolicy]
+
+Apply complete! Resources: 0 added, 1 changed, 0 destroyed.
+
+Outputs:
+
+glue_crawler_name = "northstar-dev-raw-crawler"
+glue_database_name = "northstar_dev"
+glue_transform_job_name = "northstar-dev-transform"
+ml_engineer_role_arn = "arn:aws:iam::060245184393:role/northstar-dev-MLEngineer"
+private_subnet_id = "subnet-0758104da1b295112"
+public_subnet_id = "subnet-07f18e9f1ac7a76a7"
+s3_bucket_name = "northstar-dev-data-060245184393"
+sagemaker_domain_id = "d-4irnau1yvugk"
+vpc_id = "vpc-09bb4cd71bf9b5654"
+
+Warning: Deprecated Parameter
+
+The parameter "dynamodb_table" is deprecated. Use parameter "use_lockfile"
+instead.
+module.storage.data.aws_caller_identity.current: Reading...
+module.iam.data.aws_caller_identity.current: Reading...
+module.iam.aws_iam_role.model_monitor: Refreshing state... [id=northstar-dev-ModelMonitor]
+module.vpc.aws_eip.nat[0]: Refreshing state... [id=eipalloc-04c10c0f8c30f1e6f]
+module.vpc.aws_vpc.this: Refreshing state... [id=vpc-09bb4cd71bf9b5654]
+module.iam.aws_iam_role.ml_engineer: Refreshing state... [id=northstar-dev-MLEngineer]
+module.glue.aws_glue_catalog_database.this: Refreshing state... [id=060245184393:northstar_dev]
+module.iam.aws_iam_role.data_engineer: Refreshing state... [id=northstar-dev-DataEngineer]
+module.iam.data.aws_caller_identity.current: Read complete after 0s [id=060245184393]
+module.iam.aws_iam_policy.ml_engineer: Refreshing state... [id=arn:aws:iam::060245184393:policy/northstar-dev-MLEngineerPolicy]
+module.iam.aws_iam_policy.model_monitor: Refreshing state... [id=arn:aws:iam::060245184393:policy/northstar-dev-ModelMonitorPolicy]
+module.iam.aws_iam_policy.data_engineer: Refreshing state... [id=arn:aws:iam::060245184393:policy/northstar-dev-DataEngineerPolicy]
+module.storage.data.aws_caller_identity.current: Read complete after 0s [id=060245184393]
+module.storage.aws_s3_bucket.data: Refreshing state... [id=northstar-dev-data-060245184393]
+module.iam.aws_iam_role_policy_attachment.ml_engineer: Refreshing state... [id=northstar-dev-MLEngineer-20261002054245755800000003]
+module.iam.aws_iam_role_policy_attachment.model_monitor: Refreshing state... [id=northstar-dev-ModelMonitor-20261002054245748800000002]
+module.iam.aws_iam_role_policy_attachment.data_engineer: Refreshing state... [id=northstar-dev-DataEngineer-20261002054245744900000001]
+module.vpc.aws_internet_gateway.this: Refreshing state... [id=igw-022c6c937aad46262]
+module.vpc.aws_subnet.public: Refreshing state... [id=subnet-07f18e9f1ac7a76a7]
+module.vpc.aws_subnet.private: Refreshing state... [id=subnet-0758104da1b295112]
+module.vpc.aws_security_group.this: Refreshing state... [id=sg-0e2fc68076474a233]
+module.vpc.aws_route_table.public: Refreshing state... [id=rtb-000a1104b0f23f60a]
+module.glue.aws_glue_connection.vpc: Refreshing state... [id=060245184393:northstar-dev-vpc-connection]
+module.vpc.aws_route_table_association.public: Refreshing state... [id=rtbassoc-0201343c91a9d7965]
+module.vpc.aws_nat_gateway.this[0]: Refreshing state... [id=nat-0fd1308597d7a6fa1]
+module.storage.aws_s3_bucket_public_access_block.data: Refreshing state... [id=northstar-dev-data-060245184393]
+module.storage.aws_s3_bucket_versioning.data: Refreshing state... [id=northstar-dev-data-060245184393]
+module.storage.aws_s3_bucket_server_side_encryption_configuration.data: Refreshing state... [id=northstar-dev-data-060245184393]
+module.storage.aws_s3_object.prefix["features/"]: Refreshing state... [id=features/]
+module.storage.aws_s3_object.prefix["artifacts/"]: Refreshing state... [id=artifacts/]
+module.storage.aws_s3_object.prefix["raw/"]: Refreshing state... [id=raw/]
+module.storage.aws_s3_object.prefix["processed/"]: Refreshing state... [id=processed/]
+module.glue.aws_s3_object.transform_script: Refreshing state... [id=artifacts/glue/transform.py]
+module.glue.aws_glue_crawler.raw: Refreshing state... [id=northstar-dev-raw-crawler]
+module.vpc.aws_route_table.private: Refreshing state... [id=rtb-0ed6a972b66b6e115]
+module.vpc.aws_route_table_association.private: Refreshing state... [id=rtbassoc-0f3f0d6e9af6c4cfd]
+module.sagemaker.aws_sagemaker_domain.this: Refreshing state... [id=d-4irnau1yvugk]
+module.glue.aws_glue_job.transform: Refreshing state... [id=northstar-dev-transform]
+module.sagemaker.aws_sagemaker_user_profile.ml_engineer: Refreshing state... [id=arn:aws:sagemaker:us-east-1:060245184393:user-profile/d-4irnau1yvugk/MLEngineer]
+module.storage.aws_s3_bucket_lifecycle_configuration.data[0]: Refreshing state... [id=northstar-dev-data-060245184393]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  # module.feature_store.aws_sagemaker_feature_group.customers will be created
+  + resource "aws_sagemaker_feature_group" "customers" {
+      + arn                            = (known after apply)
+      + event_time_feature_name        = "event_time"
+      + feature_group_name             = "northstar-dev-customer-features"
+      + id                             = (known after apply)
+      + record_identifier_feature_name = "customer_id"
+      + role_arn                       = "arn:aws:iam::060245184393:role/northstar-dev-DataEngineer"
+      + tags_all                       = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "terraform"
+          + "Project"     = "northstar"
+        }
+
+      + feature_definition {
+          + feature_name = "customer_id"
+          + feature_type = "String"
+        }
+      + feature_definition {
+          + feature_name = "event_time"
+          + feature_type = "Fractional"
+        }
+      + feature_definition {
+          + feature_name = "days_since_last_purchase"
+          + feature_type = "Fractional"
+        }
+      + feature_definition {
+          + feature_name = "customer_tenure_days"
+          + feature_type = "Fractional"
+        }
+      + feature_definition {
+          + feature_name = "purchase_frequency_30d"
+          + feature_type = "Fractional"
+        }
+      + feature_definition {
+          + feature_name = "purchase_frequency_90d"
+          + feature_type = "Fractional"
+        }
+      + feature_definition {
+          + feature_name = "purchase_frequency_180d"
+          + feature_type = "Fractional"
+        }
+      + feature_definition {
+          + feature_name = "avg_order_value"
+          + feature_type = "Fractional"
+        }
+      + feature_definition {
+          + feature_name = "total_spend_90d"
+          + feature_type = "Fractional"
+        }
+      + feature_definition {
+          + feature_name = "total_lifetime_value"
+          + feature_type = "Fractional"
+        }
+      + feature_definition {
+          + feature_name = "avg_basket_size_6m"
+          + feature_type = "Fractional"
+        }
+      + feature_definition {
+          + feature_name = "category_diversity_score"
+          + feature_type = "Fractional"
+        }
+      + feature_definition {
+          + feature_name = "online_to_store_ratio"
+          + feature_type = "Fractional"
+        }
+      + feature_definition {
+          + feature_name = "churn_risk_score"
+          + feature_type = "Fractional"
+        }
+      + feature_definition {
+          + feature_name = "loyalty_tier"
+          + feature_type = "String"
+        }
+      + feature_definition {
+          + feature_name = "churn_label"
+          + feature_type = "Integral"
+        }
+
+      + offline_store_config {
+          + table_format = "Glue"
+
+          + data_catalog_config (known after apply)
+
+          + s3_storage_config {
+              + resolved_output_s3_uri = (known after apply)
+              + s3_uri                 = "s3://northstar-dev-data-060245184393/features/offline-store/"
+            }
+        }
+
+      + online_store_config {
+          + enable_online_store = true
+        }
+
+      + throughput_config (known after apply)
+    }
+
+  # module.glue.aws_glue_job.feature_engineer will be created
+  + resource "aws_glue_job" "feature_engineer" {
+      + arn               = (known after apply)
+      + connections       = [
+          + "northstar-dev-vpc-connection",
+        ]
+      + default_arguments = {
+          + "--enable-continuous-cloudwatch-log" = "true"
+          + "--feature_group_name"               = "northstar-dev-customer-features"
+          + "--input_path"                       = "s3://northstar-dev-data-060245184393/processed/customers/"
+          + "--job-language"                     = "python"
+          + "--output_path"                      = "s3://northstar-dev-data-060245184393/features/customers/"
+          + "--region"                           = "us-east-1"
+        }
+      + glue_version      = "4.0"
+      + id                = (known after apply)
+      + max_capacity      = (known after apply)
+      + name              = "northstar-dev-feature-engineer"
+      + number_of_workers = 2
+      + role_arn          = "arn:aws:iam::060245184393:role/northstar-dev-DataEngineer"
+      + tags_all          = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "terraform"
+          + "Project"     = "northstar"
+        }
+      + timeout           = 30
+      + worker_type       = "G.1X"
+
+      + command {
+          + name            = "glueetl"
+          + python_version  = "3"
+          + runtime         = (known after apply)
+          + script_location = "s3://northstar-dev-data-060245184393/artifacts/glue/feature_engineer.py"
+        }
+
+      + execution_property (known after apply)
+
+      + notification_property (known after apply)
+    }
+
+  # module.glue.aws_s3_object.feature_script will be created
+  + resource "aws_s3_object" "feature_script" {
+      + acl                    = (known after apply)
+      + arn                    = (known after apply)
+      + bucket                 = "northstar-dev-data-060245184393"
+      + bucket_key_enabled     = (known after apply)
+      + checksum_crc32         = (known after apply)
+      + checksum_crc32c        = (known after apply)
+      + checksum_crc64nvme     = (known after apply)
+      + checksum_sha1          = (known after apply)
+      + checksum_sha256        = (known after apply)
+      + content_type           = (known after apply)
+      + etag                   = "5bba6c7c954456c9f5db733db53e158e"
+      + force_destroy          = false
+      + id                     = (known after apply)
+      + key                    = "artifacts/glue/feature_engineer.py"
+      + kms_key_id             = (known after apply)
+      + server_side_encryption = (known after apply)
+      + source                 = "./../../../glue-scripts/feature_engineer.py"
+      + storage_class          = (known after apply)
+      + tags_all               = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "terraform"
+          + "Project"     = "northstar"
+        }
+      + version_id             = (known after apply)
+    }
+
+Plan: 3 to add, 0 to change, 0 to destroy.
+
+Changes to Outputs:
+  + feature_group_name             = "northstar-dev-customer-features"
+  + glue_feature_engineer_job_name = "northstar-dev-feature-engineer"
+module.glue.aws_s3_object.feature_script: Creating...
+module.feature_store.aws_sagemaker_feature_group.customers: Creating...
+module.glue.aws_s3_object.feature_script: Creation complete after 0s [id=artifacts/glue/feature_engineer.py]
+module.feature_store.aws_sagemaker_feature_group.customers: Still creating... [00m10s elapsed]
+module.feature_store.aws_sagemaker_feature_group.customers: Still creating... [00m20s elapsed]
+module.feature_store.aws_sagemaker_feature_group.customers: Creation complete after 26s [id=northstar-dev-customer-features]
+module.glue.aws_glue_job.feature_engineer: Creating...
+module.glue.aws_glue_job.feature_engineer: Creation complete after 1s [id=northstar-dev-feature-engineer]
+
+Apply complete! Resources: 3 added, 0 changed, 0 destroyed.
+
+Outputs:
+
+feature_group_name = "northstar-dev-customer-features"
+glue_crawler_name = "northstar-dev-raw-crawler"
+glue_database_name = "northstar_dev"
+glue_feature_engineer_job_name = "northstar-dev-feature-engineer"
+glue_transform_job_name = "northstar-dev-transform"
+ml_engineer_role_arn = "arn:aws:iam::060245184393:role/northstar-dev-MLEngineer"
+private_subnet_id = "subnet-0758104da1b295112"
+public_subnet_id = "subnet-07f18e9f1ac7a76a7"
+s3_bucket_name = "northstar-dev-data-060245184393"
+sagemaker_domain_id = "d-4irnau1yvugk"
+vpc_id = "vpc-09bb4cd71bf9b5654"

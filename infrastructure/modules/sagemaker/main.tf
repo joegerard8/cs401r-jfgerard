@@ -5,11 +5,13 @@ resource "aws_sagemaker_domain" "this" {
   vpc_id      = var.vpc_id
   subnet_ids  = var.subnet_ids
 
-  app_network_access_type = "PublicInternetOnly"
+  app_network_access_type = "VpcOnly"
 
   default_user_settings {
     execution_role  = var.execution_role_arn
     security_groups = var.security_group_ids
+
+    studio_web_portal_settings {}
 
     kernel_gateway_app_settings {
       default_resource_spec {

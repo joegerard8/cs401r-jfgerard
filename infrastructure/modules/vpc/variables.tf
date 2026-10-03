@@ -25,3 +25,15 @@ variable "availability_zone" {
   type        = string
   default     = "us-east-1a"
 }
+
+variable "private_subnet_cidr" {
+  description = "CIDR block for the private subnet"
+  type        = string
+  default     = "10.0.1.0/24"
+}
+
+variable "enable_nat_gateway" {
+  description = "Create a NAT Gateway for private subnet internet access"
+  type        = bool
+  default     = true
+}

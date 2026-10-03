@@ -1,0 +1,61 @@
+NorthStar Lab 2 verification - account 060245184393, region us-east-1
+
+Task 1 - Platform infrastructure (25 pts)
+  PASS  private subnet exists                                subnet-0758104da1b295112
+  PASS  NAT gateway available                                nat-0fd1308597d7a6fa1
+  PASS  domain InService                                     d-4irnau1yvugk
+  PASS  domain in private subnet                             subnet-0758104da1b295112
+  PASS  domain AppNetworkAccessType VpcOnly                  
+  PASS  IAM role MLEngineer exists                           
+  PASS  IAM role DataEngineer exists                         
+  PASS  IAM role ModelMonitor exists                         
+  PASS  DataEngineer cannot write artifacts/                 implicitDeny
+  PASS  DataEngineer can read artifacts/glue/                
+  PASS  ModelMonitor cannot write S3                         implicitDeny
+  PASS  S3 lifecycle rules present                           5 rules
+
+Task 2 - Data ingestion pipeline (25 pts)
+  PASS  Glue catalog database northstar_dev                  
+  PASS  crawler registered a table                           customers
+  PASS  job northstar-dev-transform SUCCEEDED                
+  PASS  job northstar-dev-feature-engineer SUCCEEDED         
+  PASS  processed/customers/ has Parquet                     4 file(s)
+
+Data quality - processed and features (Tasks 2 and 3)
+  PASS  processed: 0 null customer_id                        0 nulls
+  PASS  processed: 0 duplicate transaction_id                0 dups
+  PASS  processed: all purchase_date parsed                  0 nulls
+  PASS  processed: transaction-level grain preserved         157627 rows / 9999 customers
+  PASS  features: no null values                             0 nulls
+  PASS  features: one row per customer                       9999 rows / 9999 customers
+  PASS  features: churn_risk_score in [0,1]                  0.000 - 1.000
+  PASS  features: all 14 columns present                     
+  PASS  features: churn_label rate plausible (15-30%)        22.0%
+  PASS  features: label not trivially separable by recency   churner min recency 0 vs active max 315
+  PASS  features: all 4 loyalty tiers present                Bronze, Gold, Platinum, Silver
+  PASS  features: churn score non-degenerate                 181 distinct
+
+Task 3 - Feature Store (20 pts)
+  PASS  feature group Created                                northstar-dev-customer-features
+  PASS  feature group has 16 definitions                     
+  PASS  churn_label is Integral                              
+  PASS  event_time is Fractional                             
+  PASS  online store enabled                                 
+  PASS  offline store points at data bucket                  
+  PASS  GetRecord returns a record                           16 features
+
+Tasks 4 and 5 - Deliverables and repo quality (30 pts)
+  PASS  docs/lab2-data-contract.md present                   
+  PASS  docs/lab2-data-lineage.png present                   
+  PASS  docs/lab2-extend-output.txt present                  
+  PASS  infrastructure/modules/glue/main.tf present          
+  PASS  infrastructure/modules/feature_store/main.tf present 
+  PASS  extend output shows Apply complete                   
+  PASS  data contract has Schema section                     
+  PASS  data contract has Quality Guarantee section          
+  PASS  data contract has SLA section                        
+  PASS  data contract has Versioning section                 
+  PASS  terraform fmt clean                                  
+
+Summary: 47 passed, 0 failed
+All checks passed. Remember to run scripts/teardown-lab2.sh after you submit.

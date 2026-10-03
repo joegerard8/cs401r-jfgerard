@@ -13,3 +13,9 @@ variable "prefixes" {
   type        = list(string)
   default     = ["raw/", "processed/", "features/", "artifacts/"]
 }
+
+variable "enable_lifecycle_rules" {
+  description = "Enable S3 lifecycle expiration rules"
+  type        = bool
+  default     = true
+}
