@@ -40,6 +40,12 @@ variable "availability_zone" {
   default     = "us-east-1a"
 }
 
+variable "enable_nat_gateway" {
+  description = "Create the NAT Gateway (bills hourly; the Glue jobs need it for outbound traffic)"
+  type        = bool
+  default     = true
+}
+
 variable "sagemaker_instance_type" {
   description = "Default kernel instance type for SageMaker Studio apps"
   type        = string

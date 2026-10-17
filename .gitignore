@@ -9,3 +9,6 @@ __pycache__/
 *.zip
 .aws/
 .localstack/
+# Lab 3 model binaries; the registered copy lives in S3 under artifacts/models/
+model/
+evaluation_results/

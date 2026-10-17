@@ -1,0 +1,5 @@
+tier,n,positives,churn_rate,auc,auc_ci_low,auc_ci_high,recall_top10,share_flagged,recall_gap_flag,too_small_to_conclude
+Bronze,1071,361,0.3371,0.7516,0.7183,0.7843,0.4321,0.183,False,False
+Silver,1139,226,0.1984,0.6978,0.66,0.7377,0.208,0.0817,True,False
+Gold,483,52,0.1077,0.7497,0.6752,0.8189,0.1154,0.0166,True,False
+Platinum,307,21,0.0684,0.8876,0.8216,0.9443,0.0952,0.0098,True,True

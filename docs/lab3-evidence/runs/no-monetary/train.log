@@ -1,0 +1,75 @@
+============================================================
+NorthStar Churn Prediction — Training Script
+============================================================
+Model inputs (8): days_since_last_purchase, customer_tenure_days, purchase_frequency_30d, purchase_frequency_90d, purchase_frequency_180d, avg_basket_size_6m, category_diversity_score, online_to_store_ratio
+sagemaker.config INFO - Not applying SDK defaults from location: C:\ProgramData\sagemaker\sagemaker\config.yaml
+sagemaker.config INFO - Not applying SDK defaults from location: C:\Users\joefg\AppData\Local\sagemaker\sagemaker\config.yaml
+Athena QueryExecutionId: a242d27f-9733-4b4d-832b-4df7552c8a17
+  9,999 rows, 9,999 unique customers
+Preprocessing 9,999 samples...
+  Null feature values: 0 (filled with sentinel -1)
+  Positive class rate: 22.0%
+  Feature matrix shape: (9999, 8)
+
+Train: 6,999 | Validation: 3,000
+
+Training XGBoost with params: {
+  "objective": "binary:logistic",
+  "eval_metric": [
+    "logloss",
+    "auc"
+  ],
+  "max_depth": 6,
+  "eta": 0.1,
+  "min_child_weight": 5,
+  "subsample": 0.8,
+  "colsample_bytree": 0.8,
+  "scale_pos_weight": 3.544805194805195,
+  "seed": 42,
+  "verbosity": 1
+}
+[0]	train-logloss:0.67005	train-auc:0.76525	validation-logloss:0.67199	validation-auc:0.72429
+[25]	train-logloss:0.50970	train-auc:0.83082	validation-logloss:0.54413	validation-auc:0.74990
+[32]	train-logloss:0.50007	train-auc:0.83767	validation-logloss:0.54153	validation-auc:0.74587
+C:\Users\joefg\OneDrive\Desktop\Fall 2026\CS 401R\cs401r-jfgerard\churn_training_skeleton.py:595: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  "eval_timestamp": datetime.utcnow().isoformat(),
+C:\Users\joefg\OneDrive\Desktop\Fall 2026\CS 401R\cs401r-jfgerard\churn_training_skeleton.py:837: UserWarning: [14:58:33] WARNING: C:\actions-runner\_work\xgboost\xgboost\src\c_api\c_api.cc:1573: Saving model in the UBJSON format as default.  You can use a file extension: `json` or `ubj` to choose between formats.
+  model.save_model(model_path)
+C:\Users\joefg\OneDrive\Desktop\Fall 2026\CS 401R\cs401r-jfgerard\churn_training_skeleton.py:850: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  "training_date": datetime.utcnow().isoformat(),
+C:\Users\joefg\AppData\Local\Programs\Python\Python312\Lib\site-packages\pydantic\_internal\_fields.py:132: UserWarning: Field "model_name" in PromptModelConfig has conflict with protected namespace "model_".
+
+You may be able to resolve this warning by setting `model_config['protected_namespaces'] = ()`.
+  warnings.warn(
+Best iteration: 12 (validation AUC 0.7528)
+
+── Evaluation Results ──────────────────────────────
+  precision_top10          : 0.7100  (threshold: 0.5000)  ✓ PASS
+  recall_top10             : 0.3227  (threshold: 0.2500)  ✓ PASS
+  auc_lift 95% CI          : [0.0087, 0.0386]  (must exclude 0)  ✓ PASS
+  All thresholds passed ✓
+
+── Slice Evaluation (loyalty_tier; recall at global top-10% cutoff, aggregate 0.3227) ──
+             n positives churn_rate     auc auc_ci_low auc_ci_high recall_top10 share_flagged recall_gap_flag too_small_to_conclude
+Bronze    1071       361     0.3371   0.729     0.6934      0.7618       0.4515        0.2007           False                 False
+Silver    1139       226     0.1984   0.653     0.6132      0.6925       0.1814        0.0641            True                 False
+Gold       483        52     0.1077  0.7154     0.6375      0.7896       0.1346        0.0186            True                 False
+Platinum   307        21     0.0684   0.855     0.7718      0.9246       0.0952        0.0098            True                  True
+  ⚠ Silver: recall 0.1814 is more than 10pp below aggregate
+  ⚠ Gold: recall 0.1346 is more than 10pp below aggregate
+  ⚠ Platinum: only 21 positives -- too few to conclude from
+  ⚠ Platinum: recall 0.0952 is more than 10pp below aggregate
+
+Confusion matrix at top-10% threshold 0.6370: TN=2253 FP=87 FN=447 TP=213
+Feature importance (gain): days_since_last_purchase=46.34, purchase_frequency_180d=25.14, purchase_frequency_30d=20.14, avg_basket_size_6m=11.23, purchase_frequency_90d=11.03, online_to_store_ratio=8.17, customer_tenure_days=8.11, category_diversity_score=7.65
+
+✓ Model saved to model/no-monetary\model.xgb
+  (exploratory run: not registered; pass --register for the final model)
+🏃 View run no-monetary at: https://mlflow.sagemaker.us-east-1.app.aws/#/experiments/1/runs/ad4ef64e8c014391b0f017ca7fd5ca08
+🧪 View experiment at: https://mlflow.sagemaker.us-east-1.app.aws/#/experiments/1
+
+✓ MLflow run logged: no-monetary (run_id ad4ef64e8c014391b0f017ca7fd5ca08)
+
+============================================================
+Training complete. AUC-ROC: 0.7459
+============================================================

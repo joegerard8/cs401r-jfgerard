@@ -1,0 +1,83 @@
+============================================================
+NorthStar Churn Prediction — Training Script
+============================================================
+Model inputs (11): days_since_last_purchase, customer_tenure_days, purchase_frequency_30d, purchase_frequency_90d, purchase_frequency_180d, avg_order_value, total_spend_90d, total_lifetime_value, avg_basket_size_6m, category_diversity_score, online_to_store_ratio
+sagemaker.config INFO - Not applying SDK defaults from location: C:\ProgramData\sagemaker\sagemaker\config.yaml
+sagemaker.config INFO - Not applying SDK defaults from location: C:\Users\joefg\AppData\Local\sagemaker\sagemaker\config.yaml
+Athena QueryExecutionId: 7fa05bef-6ed7-4734-84ca-96dc057313b4
+  9,999 rows, 9,999 unique customers
+Preprocessing 9,999 samples...
+  Null feature values: 0 (filled with sentinel -1)
+  Positive class rate: 22.0%
+  Feature matrix shape: (9999, 11)
+
+Train: 6,999 | Validation: 3,000
+
+Training XGBoost with params: {
+  "objective": "binary:logistic",
+  "eval_metric": [
+    "logloss",
+    "auc"
+  ],
+  "max_depth": 3,
+  "eta": 0.03,
+  "min_child_weight": 5,
+  "subsample": 0.8,
+  "colsample_bytree": 0.8,
+  "scale_pos_weight": 3.544805194805195,
+  "seed": 42,
+  "verbosity": 1
+}
+[0]	train-logloss:0.68683	train-auc:0.74745	validation-logloss:0.68690	validation-auc:0.73768
+[25]	train-logloss:0.59083	train-auc:0.78065	validation-logloss:0.59328	validation-auc:0.77211
+[50]	train-logloss:0.55600	train-auc:0.78430	validation-logloss:0.55982	validation-auc:0.77626
+[75]	train-logloss:0.53988	train-auc:0.78958	validation-logloss:0.54541	validation-auc:0.77840
+[100]	train-logloss:0.53063	train-auc:0.79420	validation-logloss:0.53812	validation-auc:0.77942
+[125]	train-logloss:0.52481	train-auc:0.79976	validation-logloss:0.53457	validation-auc:0.78102
+[150]	train-logloss:0.51978	train-auc:0.80486	validation-logloss:0.53166	validation-auc:0.78309
+[170]	train-logloss:0.51598	train-auc:0.80906	validation-logloss:0.53019	validation-auc:0.78274
+C:\Users\joefg\OneDrive\Desktop\Fall 2026\CS 401R\cs401r-jfgerard\churn_training_skeleton.py:595: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  "eval_timestamp": datetime.utcnow().isoformat(),
+C:\Users\joefg\OneDrive\Desktop\Fall 2026\CS 401R\cs401r-jfgerard\churn_training_skeleton.py:837: UserWarning: [15:04:26] WARNING: C:\actions-runner\_work\xgboost\xgboost\src\c_api\c_api.cc:1573: Saving model in the UBJSON format as default.  You can use a file extension: `json` or `ubj` to choose between formats.
+  model.save_model(model_path)
+C:\Users\joefg\OneDrive\Desktop\Fall 2026\CS 401R\cs401r-jfgerard\churn_training_skeleton.py:850: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  "training_date": datetime.utcnow().isoformat(),
+C:\Users\joefg\OneDrive\Desktop\Fall 2026\CS 401R\cs401r-jfgerard\churn_training_skeleton.py:888: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  f"Churn model trained {datetime.utcnow().date()} (run {args.run_name}, "
+C:\Users\joefg\AppData\Local\Programs\Python\Python312\Lib\site-packages\pydantic\_internal\_fields.py:132: UserWarning: Field "model_name" in PromptModelConfig has conflict with protected namespace "model_".
+
+You may be able to resolve this warning by setting `model_config['protected_namespaces'] = ()`.
+  warnings.warn(
+Best iteration: 150 (validation AUC 0.7831)
+
+── Evaluation Results ──────────────────────────────
+  precision_top10          : 0.7300  (threshold: 0.5000)  ✓ PASS
+  recall_top10             : 0.3318  (threshold: 0.2500)  ✓ PASS
+  auc_lift 95% CI          : [0.0422, 0.0778]  (must exclude 0)  ✓ PASS
+  All thresholds passed ✓
+
+── Slice Evaluation (loyalty_tier; recall at global top-10% cutoff, aggregate 0.3318) ──
+             n positives churn_rate     auc auc_ci_low auc_ci_high recall_top10 share_flagged recall_gap_flag too_small_to_conclude
+Bronze    1071       361     0.3371  0.7569     0.7236      0.7875       0.4709        0.2101           False                 False
+Silver    1139       226     0.1984  0.7148     0.6784      0.7551       0.1814        0.0571            True                 False
+Gold       483        52     0.1077  0.7509      0.681      0.8177       0.1154        0.0124            True                 False
+Platinum   307        21     0.0684  0.8921     0.8198      0.9485       0.0952         0.013            True                  True
+  ⚠ Silver: recall 0.1814 is more than 10pp below aggregate
+  ⚠ Gold: recall 0.1154 is more than 10pp below aggregate
+  ⚠ Platinum: only 21 positives -- too few to conclude from
+  ⚠ Platinum: recall 0.0952 is more than 10pp below aggregate
+
+Confusion matrix at top-10% threshold 0.6268: TN=2259 FP=81 FN=441 TP=219
+Feature importance (gain): days_since_last_purchase=101.43, purchase_frequency_180d=77.80, purchase_frequency_30d=43.50, avg_order_value=32.74, total_lifetime_value=24.17, purchase_frequency_90d=23.42, avg_basket_size_6m=18.89, total_spend_90d=17.25, category_diversity_score=16.40, online_to_store_ratio=15.50, customer_tenure_days=13.55
+
+✓ Model saved to model/final\model.xgb
+  uploaded s3://northstar-dev-data-060245184393/artifacts/models/churn/final-full11-d3-eta0.03-20261017T210427Z/model.tar.gz
+✓ Registered arn:aws:sagemaker:us-east-1:060245184393:model-package/northstar-churn-models/2 as PendingManualApproval
+🏃 View run final-full11-d3-eta0.03 at: https://mlflow.sagemaker.us-east-1.app.aws/#/experiments/1/runs/069843e6a19e452785e705f980bfaf58
+🧪 View experiment at: https://mlflow.sagemaker.us-east-1.app.aws/#/experiments/1
+
+✓ MLflow run logged: final-full11-d3-eta0.03 (run_id 069843e6a19e452785e705f980bfaf58)
+
+============================================================
+Training complete. AUC-ROC: 0.7827
+============================================================

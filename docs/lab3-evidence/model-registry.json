@@ -1,0 +1,47 @@
+{
+  "ModelPackageGroupName": "northstar-churn-models",
+  "Versions": [
+    {
+      "ModelPackageArn": "arn:aws:sagemaker:us-east-1:060245184393:model-package/northstar-churn-models/2",
+      "ModelPackageVersion": 2,
+      "ModelApprovalStatus": "PendingManualApproval",
+      "CreationTime": "2026-10-17 15:04:31.479000-06:00",
+      "ModelPackageDescription": "Churn model trained 2026-10-17 (run final-full11-d3-eta0.03, XGBoost 3.2.0). AUC 0.7827, P@10% 0.73, R@10% 0.3318, lift over recency 0.0605 (95% CI [0.0422, 0.0778]). Features: days_since_last_purchase, customer_tenure_days, purchase_frequency_30d, purchase_frequency_90d, purchase_frequency_180d, avg_order_value, total_spend_90d, total_lifetime_value, avg_basket_size_6m, category_diversity_score, online_to_store_ratio.",
+      "CustomerMetadataProperties": {
+        "auc_roc": "0.7827",
+        "auc_vs_baseline": "0.0605",
+        "baseline_auc": "0.7223",
+        "eval_timestamp": "2026-10-17T21:04:20.908739",
+        "lift_ci_high": "0.0778",
+        "lift_ci_low": "0.0422",
+        "n_val_samples": "3000",
+        "positive_rate_val": "0.22",
+        "precision_top10": "0.73",
+        "recall_top10": "0.3318"
+      }
+    },
+    {
+      "ModelPackageArn": "arn:aws:sagemaker:us-east-1:060245184393:model-package/northstar-churn-models/1",
+      "ModelPackageVersion": 1,
+      "ModelApprovalStatus": "Rejected",
+      "CreationTime": "2026-10-17 14:42:23.580000-06:00",
+      "ModelPackageDescription": "XGBoost churn model, run final-full11-d3-eta0.03, trained locally on XGBoost 3.2.0. Features: days_since_last_purchase, customer_tenure_days, purchase_frequency_30d, purchase_frequency_90d, purchase_frequency_180d, avg_order_value, total_spend_90d, total_lifetime_value, avg_basket_size_6m, category_diversity_score, online_to_store_ratio. AUC 0.7831, P@10% 0.7367, R@10% 0.3348, lift over recency 0.0608 (95% CI [0.0427, 0.0783]).",
+      "CustomerMetadataProperties": {
+        "athena_query_id": "c446e92c-0e01-42ad-ba2f-33ef8b34e353",
+        "auc_roc": "0.7831",
+        "auc_vs_baseline": "0.0608",
+        "baseline_auc": "0.7223",
+        "eval_timestamp": "2026-10-17T20:42:00.561337+00:00",
+        "lift_ci_high": "0.0783",
+        "lift_ci_low": "0.0427",
+        "mlflow_run_id": "e47093fd8edc4033851b61486ff2902b",
+        "n_features": "11",
+        "n_val_samples": "3000",
+        "positive_rate_val": "0.22",
+        "precision_top10": "0.7367",
+        "recall_top10": "0.3348",
+        "xgboost_version": "3.2.0"
+      }
+    }
+  ]
+}

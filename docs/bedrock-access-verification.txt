@@ -1,0 +1,56 @@
+=== Step 4: Verification output ===
+
+$ python verify.py
+PASS  Titan embeddings        dim=1024
+PASS  Claude Haiku 4.5        'OK'
+
+=== Quota check (non-zero values) ===
+
+$ aws service-quotas list-service-quotas --service-code bedrock \
+  --query "Quotas[?contains(QuotaName, 'Titan Text Embeddings V2') && contains(QuotaName, 'per minute')].[QuotaName,Value,Adjustable]" \
+  --output table
+
+------------------------------------------------------------------------------------------------------------
+|                                             ListServiceQuotas                                            |
++-------------------------------------------------------------------------------------+-----------+--------+
+|  On-demand model inference requests per minute for Amazon Titan Text Embeddings V2  |  6000.0   |  False |
+|  On-demand model inference tokens per minute for Amazon Titan Text Embeddings V2    |  300000.0 |  False |
++-------------------------------------------------------------------------------------+-----------+--------+
+
+$ aws service-quotas list-service-quotas --service-code bedrock \
+  --query "Quotas[?contains(QuotaName, 'Haiku 4.5')].[QuotaName,Value,Adjustable]" \
+  --output table
+
+-------------------------------------------------------------------------------------------------------------------------
+|                                                   ListServiceQuotas                                                   |
++-------------------------------------------------------------------------------------------------+------------+--------+
+|  Cross-region model inference requests per minute for Anthropic Claude Haiku 4.5                |  10000.0   |  True  |
+|  Cross-region model inference tokens per minute for Anthropic Claude Haiku 4.5                  |  5000000.0 |  True  |
+|  Global cross-region model inference tokens per minute for Anthropic Claude Haiku 4.5           |  5000000.0 |  True  |
+|  Batch inference input file size (in GB) for Claude Haiku 4.5                                   |  1.0       |  False |
+|  Records per input file per batch inference job for Claude Haiku 4.5                            |  100000.0  |  True  |
+|  Records per batch inference job for Claude Haiku 4.5                                           |  100000.0  |  True  |
+|  Batch inference job size (in GB) for Claude Haiku 4.5                                          |  5.0       |  False |
+|  Global cross-region model inference requests per minute for Anthropic Claude Haiku 4.5         |  10000.0   |  True  |
+|  Sum of in-progress and submitted batch inference jobs using a base model for Claude Haiku 4.5  |  100.0     |  True  |
+|  Minimum number of records per batch inference job for Claude Haiku 4.5                         |  100.0     |  False |
++-------------------------------------------------------------------------------------------------+------------+--------+
+
+=== Quota increase request: values and reasoning ===
+
+No quota increase was requested. Defaults already sufficient: Titan Text
+Embeddings V2 is 6,000 req/min, 300,000 tokens/min (fixed); Claude Haiku
+4.5 is 10,000 req/min, 5,000,000 tokens/min (adjustable). Lab 3 excludes
+production-scale traffic, so real usage will be a handful of embedding
+calls plus a few hundred generation calls for evaluation.
+
+That being said, here is the math to prove it would be sufficient for if
+lab 3 were to go to production: System 3's automation target (4,340
+contacts/day, ~4 LLM calls each) works out to ~20-25 calls/min average or 
+~75/min peak. At 30x average (~750/min, ~1.2M tokens/min), it's still well
+under both ceilings. Since even full production traffic clears these
+quotas, the lab's much smaller workload isn't a concern, and requesting an
+increase would just pad a number with no workload behind it. The one to
+watch long-term is Titan's — it's fixed, not adjustable, and System 2's
+offer-generation embedding volume (~210K offers/week) is the more likely
+one to approach its 300K tokens/min ceiling.

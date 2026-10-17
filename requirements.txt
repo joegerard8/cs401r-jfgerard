@@ -1,0 +1,26 @@
+# Lab 3 Track A (churn model). Versions are the ones the graded run used.
+# sagemaker must stay < 3.0.0: 3.x removed sagemaker.feature_store, which
+# churn_training_skeleton.py uses for the Athena query (defect 55).
+sagemaker>=2.200.0,<3.0.0
+boto3>=1.43.57
+xgboost==3.2.0
+mlflow>=3.10
+sagemaker-mlflow
+scikit-learn
+pandas
+numpy
+matplotlib
+
+# Lab 3 Track B (offer-generation RAG). The langchain-community pin is required:
+# 0.4.x dropped chat_models.vertexai, which ragas imports at load, and a plain
+# `pip install ragas` also hit pip's resolution-too-deep limit here. These are
+# the versions the evaluation ran on (ragas 0.4.3 + langchain-community 0.3.31
+# is also the lab's verified pair).
+ragas==0.4.3
+langchain-community==0.3.31
+langchain-aws>=0.2,<0.3
+datasets
+faiss-cpu
+# notebook execution (jupyter nbconvert --execute)
+nbconvert
+ipykernel

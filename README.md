@@ -16,7 +16,15 @@ infrastructure/
     glue/               catalog database, raw crawler, VPC connection, transform + feature-engineer jobs
     feature_store/      customer Feature Group (online + offline store)
 glue-scripts/           transform.py, feature_engineer.py (uploaded to artifacts/glue/ by Terraform)
-scripts/                verify and teardown scripts
+churn_training_skeleton.py   Lab 3 Track A: churn model (Athena -> XGBoost -> MLflow -> Model Registry)
+offer_rag.py                 Lab 3 Track B: offer-generation RAG (FAISS + Titan Embed V2 + Claude Haiku 4.5)
+evaluation_harness.py        Lab 3 RAGAS harness (Track B) and agent harness (Track C, unused)
+northstar-policy-docs/       RAG corpus: return, loyalty, shipping policies and FAQ
+prompt_templates/            starter offer prompts (Track B; errors corrected in offer_rag.py)
+notebooks/lab3-demo.ipynb    Lab 3 end-to-end demo, committed with outputs
+agent/, infrastructure/environments/agent/   Track C starter kit, not used (this repo did Track B)
+archived/                    Lab 2 raw sample CSV and data schema
+scripts/                verify, teardown, Lab 3 experiment and evidence scripts
 docs/                   lab evidence, data contract, diagrams
 ```
 
@@ -51,7 +59,7 @@ cd ../../..
 
 # 2. Upload the raw data
 ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
-aws s3 cp northstar-raw-sample.csv s3://northstar-dev-data-$ACCOUNT/raw/customers/northstar-raw-sample.csv
+aws s3 cp archived/northstar-raw-sample.csv s3://northstar-dev-data-$ACCOUNT/raw/customers/northstar-raw-sample.csv
 
 # 3. Crawl raw/customers/
 aws glue start-crawler --name northstar-dev-raw-crawler
@@ -83,3 +91,67 @@ bash scripts/teardown-lab2.sh
 ```
 
 `terraform destroy` alone leaves Glue ENIs, the Studio EFS, SageMaker security groups, and Feature Store leftovers behind; the script cleans those up first.
+
+## Lab 3: Model Development
+
+I did Track A (churn model) and Track B (RAG offer generation). The write-ups are `docs/lab3-evaluation-report.md`, `docs/lab3-model-design.md` and `docs/lab3-evidence/track-b-examples.md`.
+
+### Setup
+
+```bash
+pip install -r requirements.txt
+export PYTHONIOENCODING=utf-8 SAGEMAKER_SUPPRESS_V2_WARNING=1
+```
+
+This needs the Lab 2 Feature Group and the MLflow App (`northstar-mlflow`). `sagemaker` has to stay below 3.0 because 3.x removed `feature_store`.
+
+### Training the churn model
+
+The Athena query runs under my own AWS credentials, since the MLEngineer role does not have Athena access.
+
+```bash
+TF=infrastructure/environments/dev
+BUCKET=$(terraform -chdir=$TF output -raw s3_bucket_name)
+FG=$(terraform -chdir=$TF output -raw feature_group_name)
+MLFLOW_APP_ARN=$(aws sagemaker list-mlflow-apps --query "Summaries[?Name=='northstar-mlflow'].Arn | [0]" --output text)
+
+# 5 experiment runs (logged to MLflow, not registered)
+MLFLOW_APP_ARN=$MLFLOW_APP_ARN bash scripts/run-lab3-experiments.sh
+python scripts/compare_lab3_runs.py
+
+# graded run (logged to MLflow and registered as PendingManualApproval)
+python churn_training_skeleton.py \
+  --feature-group-name $FG --artifacts-bucket $BUCKET --mlflow-arn $MLFLOW_APP_ARN \
+  --max-depth 3 --eta 0.03 --num-round 1000 \
+  --run-name final-full11-d3-eta0.03 --register \
+  --model-dir model/final --output-data-dir docs/lab3-evidence \
+  2>&1 | tee docs/lab3-evidence/train-final.log
+```
+
+### Evaluating the offer generator
+
+```bash
+python scripts/run_rag_eval.py --configs starter starter+profile v2-prompt --runs 2
+python scripts/run_rag_eval.py --configs v2-multi final --runs 3
+python scripts/explain_faithfulness.py --config final
+python evaluation_harness.py --track B    # one run of the final pipeline through the harness
+jupyter nbconvert --to notebook --execute --inplace notebooks/lab3-demo.ipynb
+```
+
+### Where things are saved
+
+- Graded run log, metrics, slices and plots: `docs/lab3-evidence/`
+- Experiment runs: `docs/lab3-evidence/runs/`
+- Model file: `model/final/` locally (git-ignored), and the registered copy in `s3://northstar-dev-data-<account>/artifacts/models/`
+- MLflow runs and Model Registry: exported to `docs/lab3-evidence/mlflow-runs.csv` and `model-registry.json`
+- RAGAS results: `docs/lab3-evidence/rag_eval.csv` and `rag_eval_summary.csv` (raw per-run files go in `evaluation_results/`, which is git-ignored)
+- Demo notebook: `notebooks/lab3-demo.ipynb`
+
+### Evidence and teardown
+
+```bash
+python scripts/collect_lab3_evidence.py --track B
+bash scripts/teardown-lab3.sh
+```
+
+I ran the Python script directly because `collect-lab3-evidence.sh` calls `python3`, which is not on my Windows machine. The MLflow App is free, so I kept it for later labs.

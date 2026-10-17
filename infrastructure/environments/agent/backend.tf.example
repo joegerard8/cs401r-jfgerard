@@ -1,0 +1,11 @@
+# Copy to backend.tf and replace <ACCOUNT_ID>. Same state bucket and lock table
+# you created for Labs 1-2, but a DIFFERENT key, so this stack has its own state.
+terraform {
+  backend "s3" {
+    bucket         = "northstar-tfstate-<ACCOUNT_ID>"
+    key            = "agent/terraform.tfstate"
+    region         = "us-east-1"
+    dynamodb_table = "northstar-tfstate-lock" # same lock table as Labs 1-2
+    encrypt        = true
+  }
+}

@@ -1,0 +1,106 @@
+[
+  {
+    "name": "lookup_order",
+    "description": "Look up the status, items, estimated delivery date, and tracking information for a customer order. Use this whenever a customer asks about their order status or shipping.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "order_id": {
+          "type": "string",
+          "description": "The order ID, format ORD-XXXXXXX"
+        }
+      },
+      "required": [
+        "order_id"
+      ]
+    }
+  },
+  {
+    "name": "query_policy",
+    "description": "Search NorthStar's policy documents to answer questions about return policy, loyalty program terms, shipping, or any other store policy. Use this before answering any policy question.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "question": {
+          "type": "string",
+          "description": "The policy question to look up"
+        }
+      },
+      "required": [
+        "question"
+      ]
+    }
+  },
+  {
+    "name": "initiate_return",
+    "description": "Initiate a return for a customer order. Only use after verifying the order exists (via lookup_order) and confirming the customer wants to proceed. The system automatically enforces the return window and final-sale rules.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "order_id": {
+          "type": "string",
+          "description": "The order ID to return"
+        },
+        "reason": {
+          "type": "string",
+          "description": "Customer's reason for the return"
+        }
+      },
+      "required": [
+        "order_id",
+        "reason"
+      ]
+    }
+  },
+  {
+    "name": "apply_loyalty_credit",
+    "description": "Apply a loyalty credit to a customer's account when policy justifies it (e.g., service failure, verified defective item, shipping delay). IMPORTANT: Only call this with explicit policy justification. Credits over $50 require manager approval and will not be applied immediately.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "customer_id": {
+          "type": "string",
+          "description": "Customer account ID"
+        },
+        "amount": {
+          "type": "integer",
+          "description": "Credit amount in whole US dollars (positive integer)"
+        },
+        "reason": {
+          "type": "string",
+          "description": "Policy-based justification for the credit"
+        }
+      },
+      "required": [
+        "customer_id",
+        "amount",
+        "reason"
+      ]
+    }
+  },
+  {
+    "name": "escalate_to_human",
+    "description": "Escalate the conversation to a human customer service agent. Use for: policy exceptions, credits over $50, customer frustration or abusive behavior, complex multi-issue complaints, or any situation where you are uncertain how to help.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "customer_id": {
+          "type": "string",
+          "description": "Customer account ID"
+        },
+        "issue_summary": {
+          "type": "string",
+          "description": "Brief summary of the issue for the human agent"
+        },
+        "priority": {
+          "type": "string",
+          "description": "Priority level (use urgent for abusive customers or time-sensitive issues)"
+        }
+      },
+      "required": [
+        "customer_id",
+        "issue_summary"
+      ]
+    }
+  }
+]

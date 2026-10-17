@@ -1,0 +1,16 @@
+config,metric,runs,mean,min_run,max_run,judge_model
+starter,answer_relevancy,2,0.3315,0.321,0.342,us.anthropic.claude-haiku-4-5-20251001-v1:0
+starter,context_recall,2,0.4458,0.4458,0.4458,us.anthropic.claude-haiku-4-5-20251001-v1:0
+starter,faithfulness,2,0.1625,0.1421,0.1828,us.anthropic.claude-haiku-4-5-20251001-v1:0
+starter+profile,answer_relevancy,2,0.3931,0.3566,0.4296,us.anthropic.claude-haiku-4-5-20251001-v1:0
+starter+profile,context_recall,2,0.7333,0.7333,0.7333,us.anthropic.claude-haiku-4-5-20251001-v1:0
+starter+profile,faithfulness,2,0.191,0.1804,0.2017,us.anthropic.claude-haiku-4-5-20251001-v1:0
+v2-prompt,answer_relevancy,2,0.3307,0.3202,0.3413,us.anthropic.claude-haiku-4-5-20251001-v1:0
+v2-prompt,context_recall,2,0.7333,0.7333,0.7333,us.anthropic.claude-haiku-4-5-20251001-v1:0
+v2-prompt,faithfulness,2,0.6214,0.5167,0.7262,us.anthropic.claude-haiku-4-5-20251001-v1:0
+v2-multi,answer_relevancy,3,0.3334,0.3038,0.3625,us.anthropic.claude-haiku-4-5-20251001-v1:0
+v2-multi,context_recall,3,0.7833,0.7833,0.7833,us.anthropic.claude-haiku-4-5-20251001-v1:0
+v2-multi,faithfulness,3,0.6794,0.6667,0.6964,us.anthropic.claude-haiku-4-5-20251001-v1:0
+final,answer_relevancy,3,0.3257,0.3183,0.3294,us.anthropic.claude-haiku-4-5-20251001-v1:0
+final,context_recall,3,0.7833,0.7833,0.7833,us.anthropic.claude-haiku-4-5-20251001-v1:0
+final,faithfulness,3,0.7361,0.7125,0.7625,us.anthropic.claude-haiku-4-5-20251001-v1:0
