@@ -43,20 +43,20 @@ Performance-based: a SageMaker Model Monitor model-quality schedule on the produ
 
 ## DataOps Maturity
 
-Current level: 2 (on a 0 to 4 scale: 0 manual, 1 scripted, 2 automated and tested, 3 monitored and self-triggering, 4 continuously optimizing)
+Current level: 1 (Repeatable), on the chapter's scale of 0 Manual, 1 Repeatable, 2 Automated, 3 Governed, 4 Optimizing
 
-Evidence: The infrastructure and Glue jobs are Terraform and code (`infrastructure/modules/glue`, `glue-scripts/feature_engineer.py`). The data is tested on every build: `tests/test_data.py` has 28 passing tests in `docs/lab4-build-green.log`, including schema, grain, leakage, freshness and a check that no feature uses post-cutoff data. I also ported the feature logic to `data/feature_engineering.py`, and it matches the Glue output for all 9,999 customers.
+Evidence: The data pipeline is defined in code and reruns the same way each time: Terraform for the Glue jobs and the Feature Store (`infrastructure/modules/glue`, `infrastructure/modules/feature_store`), `glue-scripts/feature_engineer.py`, and a versioned data bucket. Every build also tests the data. `docs/lab4-build-green.log` shows 28 passing `test_data.py` tests covering schema, grain, leakage, freshness and no post-cutoff data, and `data/feature_engineering.py` matches the Glue output for all 9,999 customers. But Level 2 means pipelines trigger on their own, and mine do not. I started the crawler, the transform and the feature job by hand, and the freshness test failed on 13-day-old features until I reran the job myself. Monitoring is basic: CI checks the data, but nothing watches it between builds.
 
-Gap to Level 3: Nothing runs the data pipeline. I started the crawler, transform and feature job by hand, and the freshness test failed on 13-day-old features until I reran the job myself. There is also no alerting when a data quality check fails outside CI.
+Gap to Level 2: Nothing triggers the data pipeline, and there is no systematic data quality monitoring outside CI.
 
-Top priority investment: An EventBridge Scheduler rule that starts a Glue Workflow (crawler, transform, feature job) every night, with a Glue Data Quality ruleset on `processed/` that alarms through SNS.
+Top priority investment: An EventBridge Scheduler rule that starts a Glue Workflow (crawler, transform, feature job) every night, plus a Glue Data Quality ruleset on `processed/` that alarms to an SNS topic. DataOps is the weaker of my two disciplines, so it is the one to invest in first.
 
 ## MLOps Maturity
 
-Current level: 2
+Current level: 2 (Automated)
 
-Evidence: Every push can run tests, train on spot, register and gate a model (`buildspec.yml`, `pipeline.yaml`). The failure demo shows a failing test stopping in `PRE_BUILD` with no new package, and the alarm email arriving (`docs/lab4-failure-demo.txt`, `docs/lab4-alarm-email.png`). The champion regression test passed against v3 (`champion v3 auc=0.7721; candidate auc=0.7721`), and the registry carries lineage: data URI, timestamp, commit and metrics (`docs/lab4-model-package.json`). The fairness check flags a 42.3pp recall gap between Bronze (0.471) and Platinum (0.048).
+Evidence: A push to `main` starts the pipeline on its own: tests, spot training, registration and the gates (`buildspec.yml`, `pipeline.yaml`). The final green run was started by a push, not by hand: the execution for commit `1e73a9a` began at 23:35:56 (`docs/lab4-pipeline-runs.txt`), and CodePipeline listed its trigger type as `WebhookV2` when I checked before deleting the stack. Using the chapter's delivery measures on my own runs, a build went from start to a registered package in about 6 minutes (build `cf279eae` started 23:00:43, v4 appeared 23:06:24). The deliberate bad commit never reached the registry, and the alarm went ALARM at 22:59:17 and back to OK at 23:08:17, so I restored in 9 minutes (`docs/lab4-failure-demo.txt`). A few Level 3 pieces exist: the champion regression test passed against v3 (`champion v3 auc=0.7721; candidate auc=0.7721`), packages carry lineage (`docs/lab4-model-package.json`), and the fairness check flags a 42.3pp recall gap between Bronze (0.471) and Platinum (0.048).
 
-Gap to Level 3: There is no production monitoring or drift detection, and nothing retrains the model on its own. The triggers above are only designs. The fairness flag also has no owner or follow-up. It warns, but nobody is responsible for acting on it.
+Gap to Level 3: Nothing retrains the model on a drift signal. The two triggers in this document are designs only, and with no model deployed yet there is no production signal to monitor. The audit trail is also partial: approval is a manual console action with no policy on who can approve, and the fairness flag has no owner.
 
-Top priority investment: SageMaker Model Monitor (data quality and model quality schedules) on the Lab 5 endpoint, with the CloudWatch alarm wired to `StartPipelineExecution` as described above.
+Top priority investment: SageMaker Model Monitor (data quality and model quality schedules) on the Lab 5 endpoint, with a CloudWatch alarm that goes through an EventBridge rule to `StartPipelineExecution`, as described under Retraining Triggers.
