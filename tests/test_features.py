@@ -435,8 +435,3 @@ class TestBoundaryAndEdgeCases:
         snapshot = txns.copy(deep=True)
         build_churn_feature_set(pd.DataFrame({"customer_id": ["CUST-10000001"]}), txns, SNAPSHOT_DATE)
         pd.testing.assert_frame_equal(txns, snapshot)
-
-
-# DELIBERATE FAILURE for the Lab 4 failure demo. Reverted in the next commit.
-def test_deliberate_ci_failure_demo():
-    assert 1 + 1 == 3, "deliberate failure: demonstrating that PRE_BUILD halts the pipeline"
