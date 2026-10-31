@@ -356,6 +356,20 @@ Resources:
         Type: S3
         Location: !Ref ArtifactsBucket
 
+      # V2 pipelines ignore the source action's DetectChanges: a push only starts
+      # an execution if a trigger says so. Without this block a push to main did
+      # nothing (seen 2026-10-30: two pushes, no execution) and runs had to be
+      # started by hand with start-pipeline-execution.
+      PipelineType: V2
+      Triggers:
+        - ProviderType: CodeStarSourceConnection
+          GitConfiguration:
+            SourceActionName: GitHubSource
+            Push:
+              - Branches:
+                  Includes:
+                    - !Ref GitHubBranch
+
       Stages:
 
         # Stage 1: Source — pull from GitHub on push to main
@@ -372,7 +386,9 @@ Resources:
                 FullRepositoryId: !Sub "${GitHubOwner}/${GitHubRepo}"
                 BranchName: !Ref GitHubBranch
                 OutputArtifactFormat: CODE_ZIP
-                DetectChanges: true
+                # The push trigger is the Triggers block above. Left true, the
+                # action would also try to detect changes on its own.
+                DetectChanges: false
               OutputArtifacts:
                 - Name: SourceArtifact
 
