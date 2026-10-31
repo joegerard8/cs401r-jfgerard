@@ -1,0 +1,51 @@
+{
+    "ModelPackageSummaryList": [
+        {
+            "ModelPackageGroupName": "northstar-churn-models",
+            "ModelPackageVersion": 5,
+            "ModelPackageArn": "arn:aws:sagemaker:us-east-1:060245184393:model-package/northstar-churn-models/5",
+            "CreationTime": "2026-10-30T23:40:37.912000-06:00",
+            "ModelPackageStatus": "Completed",
+            "ModelApprovalStatus": "PendingManualApproval",
+            "ModelPackageRegistrationType": "Registered"
+        },
+        {
+            "ModelPackageGroupName": "northstar-churn-models",
+            "ModelPackageVersion": 4,
+            "ModelPackageArn": "arn:aws:sagemaker:us-east-1:060245184393:model-package/northstar-churn-models/4",
+            "CreationTime": "2026-10-30T23:06:24.146000-06:00",
+            "ModelPackageStatus": "Completed",
+            "ModelApprovalStatus": "PendingManualApproval",
+            "ModelPackageRegistrationType": "Registered"
+        },
+        {
+            "ModelPackageGroupName": "northstar-churn-models",
+            "ModelPackageVersion": 3,
+            "ModelPackageArn": "arn:aws:sagemaker:us-east-1:060245184393:model-package/northstar-churn-models/3",
+            "CreationTime": "2026-10-30T22:24:23.921000-06:00",
+            "ModelPackageStatus": "Completed",
+            "ModelApprovalStatus": "Approved",
+            "ModelPackageRegistrationType": "Registered"
+        },
+        {
+            "ModelPackageGroupName": "northstar-churn-models",
+            "ModelPackageVersion": 2,
+            "ModelPackageArn": "arn:aws:sagemaker:us-east-1:060245184393:model-package/northstar-churn-models/2",
+            "ModelPackageDescription": "Churn model trained 2026-10-17 (run final-full11-d3-eta0.03, XGBoost 3.2.0). AUC 0.7827, P@10% 0.73, R@10% 0.3318, lift over recency 0.0605 (95% CI [0.0422, 0.0778]). Features: days_since_last_purchase, customer_tenure_days, purchase_frequency_30d, purchase_frequency_90d, purchase_frequency_180d, avg_order_value, total_spend_90d, total_lifetime_value, avg_basket_size_6m, category_diversity_score, online_to_store_ratio.",
+            "CreationTime": "2026-10-17T15:04:31.479000-06:00",
+            "ModelPackageStatus": "Completed",
+            "ModelApprovalStatus": "PendingManualApproval",
+            "ModelPackageRegistrationType": "Registered"
+        },
+        {
+            "ModelPackageGroupName": "northstar-churn-models",
+            "ModelPackageVersion": 1,
+            "ModelPackageArn": "arn:aws:sagemaker:us-east-1:060245184393:model-package/northstar-churn-models/1",
+            "ModelPackageDescription": "XGBoost churn model, run final-full11-d3-eta0.03, trained locally on XGBoost 3.2.0. Features: days_since_last_purchase, customer_tenure_days, purchase_frequency_30d, purchase_frequency_90d, purchase_frequency_180d, avg_order_value, total_spend_90d, total_lifetime_value, avg_basket_size_6m, category_diversity_score, online_to_store_ratio. AUC 0.7831, P@10% 0.7367, R@10% 0.3348, lift over recency 0.0608 (95% CI [0.0427, 0.0783]).",
+            "CreationTime": "2026-10-17T14:42:23.580000-06:00",
+            "ModelPackageStatus": "Completed",
+            "ModelApprovalStatus": "Rejected",
+            "ModelPackageRegistrationType": "Registered"
+        }
+    ]
+}
