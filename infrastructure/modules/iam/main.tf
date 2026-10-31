@@ -97,6 +97,36 @@ resource "aws_iam_policy" "ml_engineer" {
         Action   = ["ecr:GetDownloadUrlForLayer", "ecr:BatchGetImage", "ecr:GetAuthorizationToken"]
         Resource = "*"
       },
+      # Lab 4: the SageMaker Pipeline runs AS this role and starts a training job
+      # that is handed the same role, which is an iam:PassRole call.
+      {
+        Sid       = "PassSelfToSageMaker"
+        Effect    = "Allow"
+        Action    = ["iam:PassRole"]
+        Resource  = aws_iam_role.ml_engineer.arn
+        Condition = { StringEquals = { "iam:PassedToService" = "sagemaker.amazonaws.com" } }
+      },
+      # Pipelines tag every job and step they create, and read the tags back.
+      # The StudioSelfService AddTags above is scoped to Studio resources only.
+      {
+        Sid      = "PipelineTagging"
+        Effect   = "Allow"
+        Action   = ["sagemaker:AddTags", "sagemaker:ListTags"]
+        Resource = "*"
+      },
+      # RegisterModel step. The registry actions the pipeline's own role needs
+      # (a student also reported these; see the Lab 4 guide's Discord addendum).
+      {
+        Sid    = "PipelineModelRegistry"
+        Effect = "Allow"
+        Action = [
+          "sagemaker:CreateModelPackage",
+          "sagemaker:CreateModelPackageGroup",
+          "sagemaker:DescribeModelPackageGroup",
+          "sagemaker:UpdateModelPackage",
+        ]
+        Resource = "*"
+      },
     ]
   })
 }

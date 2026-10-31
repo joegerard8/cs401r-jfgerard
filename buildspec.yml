@@ -1,0 +1,343 @@
+version: 0.2
+
+# NorthStar Retail — AWS CodeBuild Build Specification
+# CS 401R Lab 4 Starter Kit
+#
+# This buildspec runs the CI pipeline for the northstar-ai-platform repository.
+# Triggered by: CodePipeline on push to main branch
+#
+# Stages:
+#   install   → Set up Python, install dependencies
+#   install    → pip install -r requirements.txt (requirements.txt ships in the kit)
+#   pre_build  → data and feature tests; a failure stops the build here
+#   build      → upsert + run the SageMaker Pipeline (train on spot, register),
+#                then the model gate (test_model.py, test_fairness.py)
+#   post_build → reject the package if the build failed after registering it;
+#                publish NorthStar/CI BuildSucceeded
+#
+# Required CodeBuild environment variables (set in the CodePipeline stack):
+#   PROJECT             northstar
+#   ENVIRONMENT         dev
+#   AWS_REGION          us-east-1
+#   PIPELINE_NAME       SageMaker Pipeline name
+#   SLACK_WEBHOOK_URL   (optional) Slack webhook for build notifications
+#
+# NOTE ON BUCKETS - this changed from an earlier draft.
+# Labs 1 and 2 build ONE bucket with four prefixes:
+#     northstar-dev-data-<account-id>/{raw,processed,features,artifacts}/
+# An earlier version of this file expected three separate buckets pulled from
+# SSM Parameter Store. Those parameters are not created by anything in this
+# course, so the build failed at environment resolution before running a single
+# test. The bucket name is now derived the same way every other component
+# derives it: project + environment + account id.
+
+env:
+  variables:
+    PROJECT: "northstar"
+    ENVIRONMENT: "dev"
+    PIPELINE_NAME: "northstar-churn-pipeline"
+    PYTHON_VERSION: "3.11"
+    # NOTE: there are deliberately no MIN_* gate thresholds here any more.
+    #
+    # This file used to redeclare the model quality gates as environment
+    # variables and re-implement them in inline Python in the build phase.
+    # That was a second copy of a gate that tests/test_model.py already
+    # implements, and the two drifted, exactly as you would expect:
+    #
+    #   * MIN_AUC_LIFT_OVER_BASELINE was still 0.03 -- a fixed lift threshold
+    #     RETIRED on 2026-08-02 because 0.03 is smaller than the metric's own
+    #     run-to-run standard deviation, so it failed ~21% of splits regardless
+    #     of model quality. The gate is now "the bootstrap 95% CI on the lift
+    #     excludes zero".
+    #   * MIN_AUC_ROC gated AUC at 0.72. AUC is reported, not gated.
+    #   * the inline gate read metrics["baseline_auc_roc"], but the training
+    #     script emits baseline_auc, so it failed EVERY build with
+    #     "baseline_auc_roc missing" on models that were perfectly fine.
+    #
+    # tests/test_model.py is now the single implementation. conftest.py was
+    # built to drive it from here via EVAL_METRICS_PATH -- use that.
+
+phases:
+
+  install:
+    runtime-versions:
+      python: "3.11"
+    commands:
+      - echo "=== INSTALL PHASE ==="
+      - echo "Build started at $(date)"
+      - echo "Commit SHA $CODEBUILD_RESOLVED_SOURCE_VERSION"
+      - pip install --upgrade pip
+      - pip install -r requirements.txt
+      - if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+      - aws sts get-caller-identity
+      # Derive the single data bucket. Everything downstream uses prefixes on it.
+      - export ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+      - export DATA_BUCKET="${PROJECT}-${ENVIRONMENT}-data-${ACCOUNT_ID}"
+      - echo "Data bucket ${DATA_BUCKET}"
+
+  pre_build:
+    commands:
+      - echo "PRE-BUILD PHASE - Tests"
+
+      # Stage pipeline output locally so the data tests have something to
+      # validate. Without this the tests fail immediately - which is correct
+      # behaviour: a CI run that cannot see the data must not report success.
+      - export ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+      - export DATA_BUCKET="${PROJECT}-${ENVIRONMENT}-data-${ACCOUNT_ID}"
+      - mkdir -p data/processed data/features
+      - aws s3 cp "s3://${DATA_BUCKET}/raw/customers/northstar-raw-sample.csv" data/northstar-raw-sample.csv
+      - aws s3 cp "s3://${DATA_BUCKET}/processed/customers/" data/processed/ --recursive --exclude "*_glue_temp*"
+      - aws s3 cp "s3://${DATA_BUCKET}/features/customers/"  data/features/  --recursive
+      - export NORTHSTAR_RAW=./data/northstar-raw-sample.csv
+      - export NORTHSTAR_PROCESSED=./data/processed
+      - export NORTHSTAR_FEATURES=./data/features
+
+      # ── Data Validation Tests ──────────────────────────────────────────
+      - echo "Running data validation tests..."
+      - python -m pytest tests/test_data.py -v --tb=short --junitxml=reports/data_tests.xml
+      # TODO: Add --cov=data/ --cov-report=xml:reports/data_coverage.xml
+
+      # ── Feature Engineering Tests ──────────────────────────────────────
+      - echo "Running feature engineering tests..."
+      - python -m pytest tests/test_features.py -v --tb=short --junitxml=reports/feature_tests.xml
+
+      # NOTE: tests/test_model.py deliberately does NOT run here. It asserts on
+      # a trained model artifact and an evaluation_metrics.json, neither of
+      # which exists until the build phase has run the SageMaker Pipeline. Run
+      # this early and its gate tests skip on missing inputs, which reads as a
+      # pass and means the promotion gate never actually ran. It is invoked in
+      # the build phase instead, against the real metrics.
+
+      # ── Security Scan ──────────────────────────────────────────────────
+      # TODO: Uncomment after Lab 5 (security hardening)
+      # - bandit -r . -ll --exclude ./tests -f json -o reports/security_scan.json
+      # - cat reports/security_scan.json | python -c "
+      #     import json, sys
+      #     report = json.load(sys.stdin)
+      #     highs = [r for r in report['results'] if r['issue_severity'] == 'HIGH']
+      #     if highs:
+      #         print(f'SECURITY: {len(highs)} HIGH severity issues found')
+      #         sys.exit(1)
+      #   "
+
+      - echo "All pre-build tests passed ✓"
+
+  build:
+    commands:
+      - echo "BUILD PHASE - Train and evaluate"
+
+      - export ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+      - export DATA_BUCKET="${PROJECT}-${ENVIRONMENT}-data-${ACCOUNT_ID}"
+      # POSIX `cut`, not bash's ${VAR:0:8}. CodeBuild executes these commands
+      # with /bin/sh, where substring expansion is not a thing -- it exits 2
+      # with no useful message. The original buildspec used ${VAR:0:8} in four
+      # places, so its build phase would have died on the first one too
+      # (defect 66).
+      - export COMMIT_SHA=$(echo "$CODEBUILD_RESOLVED_SOURCE_VERSION" | cut -c1-8)
+
+      # ── Upsert the SageMaker Pipeline ──────────────────────────────────
+      # This is what used to be missing. The pipeline named here was started
+      # by the old buildspec but was never defined by anything in the repo,
+      # so `start-pipeline-execution` failed with ValidationException on a
+      # pipeline that did not exist -- the Lab 4 path had never run.
+      #
+      # Upserting on every build is also what pins the execution to this
+      # commit: the upsert packages the checked-out source_dir to S3. The old
+      # zip-and-pass-TrainingCodeS3Uri approach could not work regardless --
+      # an estimator's source_dir is resolved at definition time and wants a
+      # .tar.gz, not a pipeline parameter pointing at a .zip.
+      - echo "Upserting SageMaker Pipeline ${PIPELINE_NAME}..."
+      - |
+        python models/churn/pipeline_definition.py \
+          --role-arn "${SAGEMAKER_ROLE_ARN}" \
+          --bucket "${DATA_BUCKET}" \
+          --region "${AWS_REGION}" \
+          --upsert
+
+      # ── Trigger the pipeline ───────────────────────────────────────────
+      - echo "Starting SageMaker Pipeline execution..."
+      - |
+        EXECUTION_ARN=$(aws sagemaker start-pipeline-execution \
+          --pipeline-name ${PIPELINE_NAME} \
+          --pipeline-execution-display-name "codebuild-${COMMIT_SHA}" \
+          --pipeline-parameters "Name=CommitSha,Value=${COMMIT_SHA}" \
+          --query "PipelineExecutionArn" \
+          --output text)
+        echo "Pipeline execution started: $EXECUTION_ARN"
+        echo $EXECUTION_ARN > /tmp/pipeline_execution_arn.txt
+
+      # ── Poll pipeline status (up to 45 minutes) ────────────────────────
+      - |
+        EXECUTION_ARN=$(cat /tmp/pipeline_execution_arn.txt)
+        echo "Waiting for pipeline completion..."
+        MAX_WAIT=2700
+        ELAPSED=0
+        SLEEP_INTERVAL=30
+
+        while true; do
+          STATUS=$(aws sagemaker describe-pipeline-execution \
+            --pipeline-execution-arn $EXECUTION_ARN \
+            --query "PipelineExecutionStatus" \
+            --output text)
+
+          echo "  [${ELAPSED}s] Pipeline status: $STATUS"
+
+          if [ "$STATUS" = "Succeeded" ]; then
+            echo "Pipeline succeeded"
+            # Record the package this run registered. post_build rejects it
+            # if anything after this point fails the build (see post_build).
+            aws sagemaker list-pipeline-execution-steps \
+              --pipeline-execution-arn $EXECUTION_ARN \
+              --query "PipelineExecutionSteps[?starts_with(StepName,'RegisterChurnModel')].Metadata.RegisterModel.Arn" \
+              --output text > /tmp/model_package_arn.txt
+            echo "Registered: $(cat /tmp/model_package_arn.txt)"
+            break
+          elif [ "$STATUS" = "Failed" ] || [ "$STATUS" = "Stopped" ]; then
+            echo "Pipeline $STATUS - check SageMaker Studio for details"
+            aws sagemaker list-pipeline-execution-steps \
+              --pipeline-execution-arn $EXECUTION_ARN \
+              --query "PipelineExecutionSteps[].{Step:StepName,Status:StepStatus,Reason:FailureReason}" \
+              --output table || true
+            exit 1
+          fi
+
+          ELAPSED=$((ELAPSED + SLEEP_INTERVAL))
+          if [ $ELAPSED -ge $MAX_WAIT ]; then
+            echo "Pipeline timed out after ${MAX_WAIT}s"
+            exit 1
+          fi
+
+          sleep $SLEEP_INTERVAL
+        done
+
+      # ── Model quality gate ─────────────────────────────────────────────
+      # The training container PUTs its metrics to this exact key, and
+      # pipeline_definition.py points the Model Registry's ModelMetrics at the
+      # same URI. If this object is missing the run does NOT get to pass: a
+      # gate that cannot see the metrics has not evaluated anything, and the
+      # old `|| echo "{}"` fallback turned exactly that case into a pass.
+      - echo "Retrieving evaluation metrics..."
+      - |
+        aws s3 cp \
+          "s3://${DATA_BUCKET}/artifacts/evaluations/${COMMIT_SHA}/evaluation_metrics.json" \
+          /tmp/eval_metrics.json
+      - export EVAL_METRICS_PATH=/tmp/eval_metrics.json
+      - cat /tmp/eval_metrics.json
+
+      # Pull the actual trained artifact too. tests/test_model.py is not only a
+      # metrics gate -- TestModelLoading asserts the booster loads and that
+      # model_metadata.json travels with it. Handing it metrics but no model
+      # made those tests fail in CI while passing locally. Downloading the real
+      # model.tar.gz means CI checks the artifact that was just registered,
+      # which is the thing that will actually be deployed.
+      - |
+        EXECUTION_ARN=$(cat /tmp/pipeline_execution_arn.txt)
+        TRAIN_JOB=$(aws sagemaker list-pipeline-execution-steps \
+          --pipeline-execution-arn $EXECUTION_ARN \
+          --query "PipelineExecutionSteps[?StepName=='TrainChurnModel'].Metadata.TrainingJob.Arn" \
+          --output text | awk -F/ '{print $NF}')
+        echo "Training job: $TRAIN_JOB"
+        MODEL_URI=$(aws sagemaker describe-training-job --training-job-name "$TRAIN_JOB" \
+          --query "ModelArtifacts.S3ModelArtifacts" --output text)
+        echo "Model artifact: $MODEL_URI"
+        mkdir -p /tmp/model
+        aws s3 cp "$MODEL_URI" /tmp/model/model.tar.gz
+        tar -xzf /tmp/model/model.tar.gz -C /tmp/model
+        # model_metadata.json deliberately does NOT ship inside model.tar.gz --
+        # anything but the booster in there breaks the serving container
+        # (defect 72) -- so it comes from S3 alongside the metrics.
+        aws s3 cp \
+          "s3://${DATA_BUCKET}/artifacts/evaluations/${COMMIT_SHA}/model_metadata.json" \
+          /tmp/model/model_metadata.json
+        ls -la /tmp/model
+
+      # One gate, one implementation, the same one a student runs locally.
+      # tests/test_fairness.py (Task 1, you write it) runs here too, because it
+      # needs the metrics this run emitted. It flags, it does not block.
+      - |
+        FAIRNESS=""
+        if [ -f tests/test_fairness.py ]; then FAIRNESS=tests/test_fairness.py; fi
+        python -m pytest tests/test_model.py $FAIRNESS -v -rw --tb=short \
+          --eval-metrics-path /tmp/eval_metrics.json \
+          --model-path /tmp/model/xgboost-model \
+          --junitxml=reports/model_gate.xml
+
+  post_build:
+    commands:
+      - echo "=== POST-BUILD PHASE ==="
+      - echo "Build completed at $(date)"
+      - echo "Build status $CODEBUILD_BUILD_SUCCEEDING"
+      # Re-derived, not inherited: CodeBuild does not carry `export`s across
+      # phase boundaries, which is why every phase above re-derives ACCOUNT_ID
+      # and DATA_BUCKET rather than trusting the previous one.
+      - export COMMIT_SHA=$(echo "$CODEBUILD_RESOLVED_SOURCE_VERSION" | cut -c1-8)
+
+      # ── Reject a package registered by a build that then failed ───────
+      # The SageMaker Pipeline registers the model (PendingManualApproval)
+      # BEFORE tests/test_model.py runs above. A model that fails a gate inside
+      # training is never registered -- the training step fails first -- but
+      # one that fails a CodeBuild-only test (model loading, monotonicity,
+      # champion regression) already sits in the registry. Without this step
+      # a red build leaves an approvable package behind (seen 2026-10-19, v7).
+      # post_build does run when the BUILD phase fails, so this is reached;
+      # a PRE_BUILD failure skips it, but then nothing was registered.
+      - |
+        if [ "$CODEBUILD_BUILD_SUCCEEDING" = "0" ] && [ -s /tmp/model_package_arn.txt ]; then
+          PKG=$(cat /tmp/model_package_arn.txt)
+          aws sagemaker update-model-package --model-package-arn "$PKG" \
+            --model-approval-status Rejected \
+            --approval-description "Auto-rejected: CodeBuild build ${CODEBUILD_BUILD_ID} (commit ${COMMIT_SHA}) failed after registration."
+          echo "Rejected $PKG"
+        fi
+
+      # ── Publish build outcome to CloudWatch ───────────────────────────
+      # READ THIS BEFORE RELYING ON THIS METRIC.
+      #
+      # post_build runs when the BUILD phase fails, but NOT when PRE_BUILD
+      # fails -- CodeBuild goes straight to FINALIZING and skips it. Verified
+      # 2026-08-04 with a deliberate failing test: no POST_BUILD phase appeared
+      # in the build at all. So this metric is ABSENT for test failures, and it
+      # is deliberately NOT what the build-failure alarm watches; that alarm is
+      # on AWS/CodeBuild FailedBuilds, which CodeBuild emits itself and which
+      # no phase failure can skip.
+      #
+      # What this metric is for: the Lab 6 CI dashboard, and telling a gate
+      # rejection apart from an earlier failure. BuildSucceeded=0 means the run
+      # got as far as the model quality gate and the gate said no. Its absence
+      # on a failed build means the run died before that point.
+      - |
+        aws cloudwatch put-metric-data \
+          --namespace NorthStar/CI \
+          --metric-name BuildSucceeded \
+          --dimensions Project=${PROJECT}-ci \
+          --value ${CODEBUILD_BUILD_SUCCEEDING} \
+          --unit Count
+        echo "Published NorthStar/CI BuildSucceeded=${CODEBUILD_BUILD_SUCCEEDING}"
+
+      # ── Slack notification (optional) ────────────────────────────────
+      - |
+        if [ -n "${SLACK_WEBHOOK_URL:-}" ]; then
+          if [ "$CODEBUILD_BUILD_SUCCEEDING" = "1" ]; then
+            MSG="✅ NorthStar CI passed — commit ${COMMIT_SHA}"
+          else
+            MSG="🚨 NorthStar CI FAILED — commit ${COMMIT_SHA}"
+          fi
+          curl -s -X POST -H 'Content-type: application/json' \
+            --data "{\"text\": \"$MSG\"}" \
+            $SLACK_WEBHOOK_URL || true
+        fi
+
+reports:
+  northstar-test-reports:
+    files:
+      - "reports/*.xml"
+    file-format: "JUNITXML"
+
+artifacts:
+  files:
+    - "reports/**/*"
+  name: "northstar-build-$(date +%Y%m%d)-$CODEBUILD_RESOLVED_SOURCE_VERSION"
+
+cache:
+  paths:
+    - "/root/.cache/pip/**/*"

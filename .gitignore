@@ -12,3 +12,9 @@ __pycache__/
 # Lab 3 model binaries; the registered copy lives in S3 under artifacts/models/
 model/
 evaluation_results/
+
+# Lab 4: pipeline data staged by buildspec.yml / local test runs, and CI reports
+data/processed/
+data/features/
+data/*.csv
+reports/

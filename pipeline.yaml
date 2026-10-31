@@ -1,0 +1,456 @@
+# NorthStar Retail — SageMaker Pipeline Definition
+# CS 401R Lab 4 Starter Kit
+#
+# This CloudFormation template defines the NorthStar CI/CD infrastructure:
+#   1. CodePipeline — orchestrates the full Source → Build → (Manual Approval) → Deploy flow
+#   2. CodeBuild project — runs tests and triggers the SageMaker training pipeline
+#   3. SageMaker Pipeline — defined separately via Python SDK (see pipeline_definition.py)
+#
+# Deploy this stack:
+#   aws cloudformation deploy \
+#     --template-file pipeline.yaml \
+#     --stack-name northstar-cicd \
+#     --parameter-overrides \
+#         ProjectName=northstar \
+#         Environment=dev \
+#         GitHubOwner=YOUR_GITHUB_USERNAME \
+#         GitHubRepo=cs401r-<your-netid> \
+#         GitHubBranch=main \
+#         ArtifactsBucket=northstar-dev-cicd-artifacts-<account-id> \
+#         GitHubConnectionArn=arn:aws:codeconnections:us-east-1:<acct>:connection/<id> \
+#         SageMakerRoleArn=<ml_engineer_role_arn> \
+#     --capabilities CAPABILITY_NAMED_IAM
+
+AWSTemplateFormatVersion: "2010-09-09"
+Description: NorthStar AI Platform - CI/CD Pipeline Stack
+
+# ── Parameters ─────────────────────────────────────────────────────────────────
+
+Parameters:
+  ProjectName:
+    Type: String
+    Default: northstar
+    Description: Project name - used as prefix for all resource names
+
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues: [dev, staging, prod]
+
+  GitHubOwner:
+    Type: String
+    Description: GitHub username or org that owns the repository
+    # TODO: Set your GitHub username here
+
+  GitHubRepo:
+    Type: String
+    Description: >-
+      Your course repository name, cs401r-<your-netid>. No default on purpose:
+      a wrong name deploys cleanly and then fails at the Source stage.
+
+  GitHubBranch:
+    Type: String
+    Default: main
+
+  ArtifactsBucket:
+    Type: String
+    Description: >-
+      S3 bucket for CodePipeline's own stage artifacts. This is NOT the
+      NorthStar data bucket. CodePipeline needs a working bucket of its own;
+      the data bucket (northstar-dev-data-<account-id>) is referenced by the
+      buildspec through prefixes and must not be reused here.
+
+  SageMakerRoleArn:
+    Type: String
+    Description: >-
+      MLEngineer role ARN from your Lab 1/2 Terraform output. Get it with:
+        terraform -chdir=infrastructure/environments/dev output -raw ml_engineer_role_arn
+      An earlier version of this template read it from SSM Parameter Store at
+      /northstar/sagemaker-role-arn, but nothing in this course creates that
+      parameter, so the stack failed at parameter resolution. Pass the ARN
+      directly, or create the SSM parameter yourself and switch the type back.
+
+  GitHubConnectionArn:
+    Type: String
+    Description: >-
+      ARN of an ALREADY-AUTHORIZED CodeStar/CodeConnections connection to GitHub.
+      This template used to CREATE the connection instead of taking it, which
+      could never work. A connection created by CloudFormation is always born
+      PENDING, and PENDING connections can only be completed by a human in the
+      console -- so the stack came up "successfully" with a source stage that
+      could never pull. Worse, it hardcoded the name northstar-github, which
+      already exists on this account, so a second create fails outright.
+      Create and authorize the connection ONCE, then pass it here:
+        aws codeconnections create-connection \
+          --provider-type GitHub --connection-name northstar-github
+        # then authorize it in the console: Developer Tools -> Settings ->
+        # Connections -> northstar-github -> Update pending connection
+        aws codeconnections list-connections \
+          --query "Connections[?ConnectionName=='northstar-github'].ConnectionArn" --output text
+      It must read AVAILABLE before the pipeline will run.
+
+  SageMakerPipelineName:
+    Type: String
+    Default: northstar-churn-pipeline
+
+# ── Resources ──────────────────────────────────────────────────────────────────
+
+Resources:
+
+  # ── CodeBuild: IAM Role ─────────────────────────────────────────────────────
+
+  CodeBuildRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${ProjectName}-codebuild-role"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codebuild.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+      Policies:
+        - PolicyName: NorthStarCodeBuildPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/${ProjectName}-*"
+              - Effect: Allow
+                Action:
+                  # The build now UPSERTS the pipeline before starting it, so
+                  # create/update/describe are required, not just start. Without
+                  # these the build fails at the upsert with AccessDenied.
+                  - sagemaker:CreatePipeline
+                  - sagemaker:UpdatePipeline
+                  - sagemaker:DescribePipeline
+                  - sagemaker:StartPipelineExecution
+                  - sagemaker:DescribePipelineExecution
+                  - sagemaker:ListPipelineExecutionSteps
+                Resource: !Sub "arn:aws:sagemaker:${AWS::Region}:${AWS::AccountId}:pipeline/${SageMakerPipelineName}*"
+              - Effect: Allow
+                Action:
+                  # RegisterModel creates a model package in this group, and the
+                  # group itself must exist before the first registration.
+                  - sagemaker:CreateModelPackageGroup
+                  - sagemaker:DescribeModelPackageGroup
+                  - sagemaker:CreateModelPackage
+                  - sagemaker:DescribeModelPackage
+                  - sagemaker:ListModelPackages
+                  # buildspec post_build rejects a package registered by a build
+                  # that then failed; also lets you write lineage metadata
+                  # (CustomerMetadataProperties) from CI.
+                  - sagemaker:UpdateModelPackage
+                Resource: !Sub "arn:aws:sagemaker:${AWS::Region}:${AWS::AccountId}:model-package*/*"
+              - Effect: Allow
+                Action:
+                  - sagemaker:DescribeTrainingJob
+                  - sagemaker:CreateTrainingJob
+                  - sagemaker:CreateModel
+                Resource: !Sub "arn:aws:sagemaker:${AWS::Region}:${AWS::AccountId}:*"
+              - Effect: Allow
+                Action:
+                  - ssm:GetParameter
+                  - ssm:GetParameters
+                Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/northstar/*"
+              - Effect: Allow
+                Action:
+                  - cloudwatch:PutMetricData
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - iam:PassRole
+                Resource: !Ref SageMakerRoleArn
+                Condition:
+                  StringEquals:
+                    iam:PassedToService: sagemaker.amazonaws.com
+              - Effect: Allow
+                Action:
+                  - codebuild:CreateReportGroup
+                  - codebuild:CreateReport
+                  - codebuild:UpdateReport
+                  - codebuild:BatchPutTestCases
+                Resource: !Sub "arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:report-group/${ProjectName}-*"
+
+  # ── CodeBuild: Project ──────────────────────────────────────────────────────
+
+  CodeBuildProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: !Sub "${ProjectName}-ci"
+      Description: NorthStar AI Platform CI - runs tests and triggers SageMaker pipeline
+      ServiceRole: !GetAtt CodeBuildRole.Arn
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_MEDIUM
+        Image: aws/codebuild/standard:7.0
+        EnvironmentVariables:
+          - Name: PIPELINE_NAME
+            Value: !Ref SageMakerPipelineName
+          - Name: AWS_REGION
+            Value: !Ref AWS::Region
+          # buildspec.yml passes this to pipeline_definition.py --role-arn.
+          # It is the role the TRAINING JOB assumes, not the CodeBuild role.
+          - Name: SAGEMAKER_ROLE_ARN
+            Value: !Ref SageMakerRoleArn
+          # Bucket names are derived in buildspec.yml as
+          # ${PROJECT}-${ENVIRONMENT}-data-${ACCOUNT_ID}, not read from SSM.
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: buildspec.yml
+      TimeoutInMinutes: 90
+      LogsConfig:
+        CloudWatchLogs:
+          Status: ENABLED
+          GroupName: !Sub "/aws/codebuild/${ProjectName}-ci"
+
+  # ── CodePipeline: IAM Role ──────────────────────────────────────────────────
+
+  CodePipelineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${ProjectName}-codepipeline-role"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codepipeline.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: NorthStarPipelinePolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:PutObject
+                Resource: !Sub "arn:aws:s3:::${ArtifactsBucket}/*"
+              - Effect: Allow
+                Action:
+                  - s3:GetBucketVersioning
+                Resource: !Sub "arn:aws:s3:::${ArtifactsBucket}"
+              - Effect: Allow
+                Action:
+                  - codebuild:BatchGetBuilds
+                  - codebuild:StartBuild
+                Resource: !GetAtt CodeBuildProject.Arn
+              - Effect: Allow
+                Action:
+                  - codestar-connections:UseConnection
+                  - codeconnections:UseConnection
+                Resource: !Ref GitHubConnectionArn
+              - Effect: Allow
+                Action:
+                  - sns:Publish
+                Resource: !Ref ModelApprovalTopic
+
+  # ── Model approval notifications ────────────────────────────────────────────
+  # The ManualApproval stage below publishes here. This topic did not exist in
+  # any template, Terraform module or script -- `aws sns list-topics` returned
+  # empty on the reference account -- so the approval action referenced an ARN
+  # that was never created and the stage failed at runtime.
+
+  ModelApprovalTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub "${ProjectName}-model-approvals"
+      DisplayName: NorthStar model promotion approvals
+
+  ModelApprovalTopicPolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      Topics:
+        - !Ref ModelApprovalTopic
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          # Sids are mandatory once there is more than one statement: SNS
+          # rejects the policy with "Every policy statement must have a unique
+          # ID" and the stack update rolls back.
+          - Sid: AllowCodePipelineApprovalNotifications
+            Effect: Allow
+            Principal:
+              Service: codepipeline.amazonaws.com
+            Action: sns:Publish
+            Resource: !Ref ModelApprovalTopic
+          # cloudwatch.amazonaws.com is NOT optional, and leaving it out fails
+          # silently in the worst possible way. Without it the build-failure
+          # alarm evaluates correctly, transitions to ALARM on cue, turns the
+          # console red -- and cannot publish. The only trace is one line in
+          # `aws cloudwatch describe-alarm-history --history-item-type Action`:
+          #     Failed to execute action arn:aws:sns:...:northstar-model-approvals
+          # Nothing surfaces on the alarm itself, nothing on the topic. An alarm
+          # that fires and cannot notify is worse than no alarm, because it
+          # looks like coverage. Verified 2026-08-04 (defect 74).
+          - Sid: AllowCloudWatchAlarmNotifications
+            Effect: Allow
+            Principal:
+              Service: cloudwatch.amazonaws.com
+            Action: sns:Publish
+            Resource: !Ref ModelApprovalTopic
+
+  # ── Build-failure alarm ─────────────────────────────────────────────────────
+  # Task 2 requires that a failed gate does not just halt the build but tells
+  # somebody. Nothing wired this until 2026-08-04.
+  #
+  # This alarm watches AWS/CodeBuild's built-in FailedBuilds, and the reason is
+  # a correction worth reading. The first implementation used a custom metric
+  # published from buildspec.yml's post_build phase, on the assumption that
+  # post_build always runs. IT DOES NOT. Verified 2026-08-04 with a deliberate
+  # failing test: when PRE_BUILD fails, CodeBuild goes straight to FINALIZING
+  # and POST_BUILD never executes at all -- so the alarm stayed OK through a
+  # failed run, which is precisely the case the rubric names. (post_build does
+  # run when the BUILD phase fails, which is where that belief comes from.)
+  #
+  # FailedBuilds is emitted by CodeBuild itself regardless of which phase
+  # failed, so it cannot be skipped by the failure it is meant to report.
+  # Confirmed emitted for the pre_build failure above.
+
+  BuildFailureAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "${ProjectName}-ci-build-failure"
+      AlarmDescription: >-
+        A NorthStar CI build failed. Either a test failed, or the model quality
+        gate rejected the candidate -- it did not beat the recency-only
+        baseline with a confidence interval excluding zero. Nothing was
+        registered. Check the NorthStar/CI BuildSucceeded metric to tell the
+        two apart: absent means it failed before the gate ran.
+      Namespace: AWS/CodeBuild
+      MetricName: FailedBuilds
+      Dimensions:
+        - Name: ProjectName
+          Value: !Ref CodeBuildProject
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      # notBreaching so quiet periods read OK rather than INSUFFICIENT_DATA.
+      TreatMissingData: notBreaching
+      AlarmActions:
+        - !Ref ModelApprovalTopic
+      OKActions:
+        - !Ref ModelApprovalTopic
+
+  # ── CodePipeline ────────────────────────────────────────────────────────────
+
+  NorthStarPipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      Name: !Sub "${ProjectName}-pipeline"
+      RoleArn: !GetAtt CodePipelineRole.Arn
+      ArtifactStore:
+        Type: S3
+        Location: !Ref ArtifactsBucket
+
+      Stages:
+
+        # Stage 1: Source — pull from GitHub on push to main
+        - Name: Source
+          Actions:
+            - Name: GitHubSource
+              ActionTypeId:
+                Category: Source
+                Owner: AWS
+                Provider: CodeStarSourceConnection
+                Version: "1"
+              Configuration:
+                ConnectionArn: !Ref GitHubConnectionArn
+                FullRepositoryId: !Sub "${GitHubOwner}/${GitHubRepo}"
+                BranchName: !Ref GitHubBranch
+                OutputArtifactFormat: CODE_ZIP
+                DetectChanges: true
+              OutputArtifacts:
+                - Name: SourceArtifact
+
+        # Stage 2: Build — run tests and trigger SageMaker training pipeline
+        - Name: Build
+          Actions:
+            - Name: RunTestsAndTrain
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: "1"
+              Configuration:
+                ProjectName: !Ref CodeBuildProject
+              InputArtifacts:
+                - Name: SourceArtifact
+              OutputArtifacts:
+                - Name: BuildArtifact
+              RunOrder: 1
+
+        # Stage 3: Manual Approval — required before model goes to production
+        # A human must review the model metrics and approve before SageMaker
+        # changes the model's approval status to "Approved"
+        - Name: ManualApproval
+          Actions:
+            - Name: ReviewModelMetrics
+              ActionTypeId:
+                Category: Approval
+                Owner: AWS
+                Provider: Manual
+                Version: "1"
+              Configuration:
+                NotificationArn: !Ref ModelApprovalTopic
+                CustomData: >-
+                  The candidate passed every CI gate (precision@10% >= 0.50,
+                  recall@10% >= 0.25, AUC lift CI over the recency baseline
+                  excludes zero, AUC >= champion - 0.02). Read its metrics and
+                  slice_results in the Model Registry, review any fairness
+                  flag in the build log, then set the package to Approved or
+                  Rejected and approve or reject this action.
+                ExternalEntityLink: !Sub "https://${AWS::Region}.console.aws.amazon.com/sagemaker/home?region=${AWS::Region}#/model-registry"
+              RunOrder: 1
+
+        # Stage 4: Deploy — update Model Registry status to Approved
+        # This triggers the SageMaker endpoint update (canary deployment)
+        # TODO: Implement this stage in Lab 5 (Deployment & Scaling)
+        # - Name: Deploy
+        #   Actions:
+        #     - Name: UpdateModelApproval
+        #       ActionTypeId:
+        #         Category: Invoke
+        #         Owner: AWS
+        #         Provider: Lambda
+        #         Version: "1"
+        #       Configuration:
+        #         FunctionName: !Ref ModelApprovalLambda
+        #       InputArtifacts:
+        #         - Name: BuildArtifact
+
+# ── Outputs ────────────────────────────────────────────────────────────────────
+
+Outputs:
+  PipelineName:
+    Value: !Ref NorthStarPipeline
+    Description: CodePipeline name
+    Export:
+      Name: !Sub "${ProjectName}-pipeline-name"
+
+  CodeBuildProjectName:
+    Value: !Ref CodeBuildProject
+    Description: CodeBuild project name
+    Export:
+      Name: !Sub "${ProjectName}-codebuild-project"
+
+  ModelApprovalTopicArn:
+    Value: !Ref ModelApprovalTopic
+    Description: >-
+      Subscribe an address to this topic or approvals go unnoticed:
+        aws sns subscribe --topic-arn <arn> --protocol email --notification-endpoint you@example.com
+    Export:
+      Name: !Sub "${ProjectName}-model-approvals-topic"
