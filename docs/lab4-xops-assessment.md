@@ -19,7 +19,9 @@ I did not make one stage per phase. A stage is a place to hand artifacts off or 
 
 Registration happens before the CodeBuild-only tests, so `post_build` sets the package to `Rejected` if those fail. A model that fails the gate inside `train()` never registers at all. A failure in the Test phase stops the build in `PRE_BUILD`, so neither Build nor Register runs (`docs/lab4-failure-demo.txt`).
 
-One thing I should be clear about: pushes did not start the pipeline at first. The pipeline came up as V2 with no push trigger, and then the GitHub app was only authorized, not installed, so GitHub never sent push events. The two failure-demo runs (`78379493` and its revert `cf279eae`) were started with `start-pipeline-execution`, and they built the right commits. After I added a `Triggers` block, installed the app and used a new connection, an empty commit started the final green run (`8e7cafb6`, commit `1e73a9a`) by itself.
+The Source phase is automatic: a push to `main` starts the pipeline. I set this up with a push trigger on the V2 pipeline (the `Triggers` block in `pipeline.yaml`) and a GitHub connection whose app is installed on my repo. I tested it by pushing an empty commit, `1e73a9a`. The pipeline started at 23:35:56, seconds after the push, with trigger type `WebhookV2`, and that run is the final green run (`8e7cafb6`).
+
+Getting there took some debugging. The pipeline came up as V2 with no trigger block, and my first connection was only authorized, not installed, so GitHub never sent push events. The failure demo ran before I fixed that, so I started the failing run (`78379493`) and its revert (`cf279eae`) with `start-pipeline-execution`. They still built exactly the commits named in `docs/lab4-failure-demo.txt`.
 
 ## Champion-Challenger
 
